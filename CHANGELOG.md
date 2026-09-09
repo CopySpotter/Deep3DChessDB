@@ -1,17 +1,34 @@
 # Changelog
 
-## 0.1.0 - 2026-09-07
+## 0.1.0 - 2026-09-10
 
-Erster Arbeitsstand für das gemeinsame Repository.
+Erster funktionsfähiger öffentlicher Prototyp von Deep3DChessDB.
 
 ### Hinzugefügt
 
-- chessboard3.js 0.1.3 als 3D-Basis
+- chessboard3.js als 3D-Basis
+- chess.js als Regelkern für legale Züge
+- legale Drag-and-drop-Züge auf dem 3D-Brett
+- automatische vollständige FEN nach jedem legalen Zug
+- automatische ChessDB-Abfrage nach jedem Zug
 - ChessDB-Adapter `js/chessboard3.chessdb.js`
 - PHP-Proxy zu `chessdb.cn`
-- Demo mit FEN-Eingabe
 - Kandidatenzüge und Bewertungen via `queryall`
 - Hauptvariante via `querypv`
+- `querybest`, `queryscore` und `querysearch`
 - Deepen/Queue
 - automatische Analyseanforderung und 5-Sekunden-Polling bei `unknown`
-- README, Architektur und Roadmap
+- Synchronisierung von Rochade, en passant und Bauernumwandlung mit dem 3D-Brett
+- Windows- und Linux-Schnellstart in der Dokumentation
+
+### Behoben
+
+- unbekannte ChessDB-Scores (`??`) erzeugen kein `NaN` mehr
+- ChessDB-Proxy verwendet bei HTTPS-Problemen bzw. 5xx einen HTTP-Fallback
+- Proxy-Fehler werden im Frontend mit konkreterer Ursache angezeigt
+
+### Status
+
+v0.1.0 ist ein früher Prototyp, aber die Kernkette funktioniert vollständig:
+
+`legaler Benutzerzug → FEN → ChessDB → Kandidatenzüge / Bewertung / PV`
