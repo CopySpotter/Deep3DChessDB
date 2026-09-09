@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1 - in Entwicklung
+
+### Geändert
+
+- 3D-Brett kann mit der Maus gedreht und gekippt werden
+- Mausrad-Zoom für die 3D-Ansicht
+- kleinere Koordinatenbeschriftung neben dem Brett
+- Buchstaben nur an einer Brettkante, Zahlen nur an einer Brettkante
+- Button „Brett drehen“ mit automatisch angepasster Koordinatenrichtung
+
 ## 0.1.0 - 2026-09-10
 
 Erster funktionsfähiger öffentlicher Prototyp von Deep3DChessDB.
