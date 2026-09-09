@@ -50,8 +50,28 @@
     return withTimeout(function (signal) {
       return fetch(url, { method: 'GET', cache: 'no-store', signal: signal || undefined });
     }, this.timeout).then(function (res) {
-      if (!res.ok) throw new Error('ChessDB HTTP ' + res.status);
-      return res.text();
+      return res.text().then(function (text) {
+        if (!res.ok) {
+          var detail = '';
+          try {
+            var parsed = JSON.parse(text);
+            if (parsed && parsed.message) detail = parsed.message;
+            if (parsed && Array.isArray(parsed.attempts)) {
+              var attempts = parsed.attempts.map(function (attempt) {
+                var bits = [];
+                if (attempt.status) bits.push('HTTP ' + attempt.status);
+                if (attempt.error) bits.push(attempt.error);
+                return bits.join(': ');
+              }).filter(Boolean);
+              if (attempts.length) detail += (detail ? ' ' : '') + '[' + attempts.join(' | ') + ']';
+            }
+          } catch (e) {
+            detail = text.trim();
+          }
+          throw new Error('ChessDB HTTP ' + res.status + (detail ? ': ' + detail : ''));
+        }
+        return text;
+      });
     }).then(function (text) {
       var trimmed = text.trim();
       if (!trimmed) return { status: 'empty', raw: '' };
