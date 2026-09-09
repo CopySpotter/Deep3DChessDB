@@ -1,0 +1,40 @@
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs / temporäre Dateien
+*.log
+*.tmp
+*.bak
+*~
+
+# Lokale Konfiguration / Secrets
+.env
+.env.*
+!.env.example
+
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build-Ausgaben
+dist/
+build/
+
+# PHP / Composer (falls später verwendet)
+vendor/
+
+# Test- und Cache-Dateien
+.cache/
+coverage/
+
+# Lokale Server-/Entwicklungsdateien
+*.pid

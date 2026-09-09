@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>chessboard3.js + ChessDB</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f4f4; color: #222; }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    h1 { margin-top: 0; }
+    .layout { display: grid; grid-template-columns: minmax(420px, 2fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
+    #board { width: 100%; min-height: 420px; background: #ddd; }
+    .card { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
+    textarea { width: 100%; min-height: 72px; box-sizing: border-box; font: 13px ui-monospace, monospace; }
+    button { margin: 8px 6px 0 0; padding: 8px 12px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #eee; font-size: 14px; }
+    code, pre { font-family: ui-monospace, monospace; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #f7f7f7; padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; }
+    .muted { color: #666; font-size: 13px; }
+    .status { min-height: 1.4em; margin-top: 8px; }
+    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } #board { min-height: 320px; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>chessboard3.js + ChessDB</h1>
+  <p class="muted">3D-Brett als Anzeige, ChessDB als Cloud-Analyse. Für korrekte Analyse immer eine vollständige FEN verwenden.</p>
+  <div class="layout">
+    <div class="card"><div id="board"></div></div>
+    <div class="card">
+      <label for="fen"><strong>FEN</strong></label>
+      <textarea id="fen">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</textarea>
+      <div>
+        <button id="show">Am Brett anzeigen</button>
+        <button id="analyse">ChessDB analysieren</button>
+        <button id="pv">PV</button>
+        <button id="deepen">Deepen</button>
+      </div>
+      <div class="status" id="status"></div>
+      <div id="moves"></div>
+      <pre id="raw" hidden></pre>
+    </div>
+  </div>
+</main>
+
+<!-- chessboard3.js was built for the classic THREE global API (tested around r80). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/80/three.min.js"></script>
+<script src="js/chessboard3.js"></script>
+<script src="js/chessboard3.chessdb.js"></script>
+<script>
+(function () {
+  var fenEl = document.getElementById('fen');
+  var statusEl = document.getElementById('status');
+  var movesEl = document.getElementById('moves');
+  var rawEl = document.getElementById('raw');
+  var board = new ChessBoard3('board', {
+    position: 'start',
+    draggable: false,
+    pieceTheme: 'classic'
+  });
+  var cdb = ChessBoard3ChessDB.attach(board, {
+    endpoint: 'chessdb-proxy.php',
+    learn: true,
+    getFen: function () { return fenEl.value.trim(); }
+  });
+
+  function showPosition() {
+    var fen = fenEl.value.trim();
+    board.position(fen, true); // chessboard3 intentionally uses only piece placement
+  }
+
+  function busy(text) {
+    statusEl.textContent = text;
+    movesEl.innerHTML = '';
+    rawEl.hidden = true;
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function renderMoves(result) {
+    var moves = ChessBoard3ChessDB.normalizeMoves(result);
+    if (!moves.length) {
+      movesEl.innerHTML = '<p>Keine Zugliste im Ergebnis.</p>';
+      rawEl.textContent = JSON.stringify(result, null, 2);
+      rawEl.hidden = false;
+      return;
+    }
+    var html = '<table><thead><tr><th>Zug</th><th>Score</th><th>Rank</th><th>Winrate</th><th>Note</th></tr></thead><tbody>';
+    moves.slice(0, 12).forEach(function (m) {
+      html += '<tr><td><strong>' + esc(m.san || m.uci || m.move) + '</strong></td>' +
+        '<td>' + esc(m.score != null ? (Number(m.score) / 100).toFixed(2) : '') + '</td>' +
+        '<td>' + esc(m.rank) + '</td><td>' + esc(m.winrate) + '</td><td>' + esc(m.note) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    movesEl.innerHTML = html;
+  }
+
+  document.getElementById('show').onclick = function () {
+    try { showPosition(); statusEl.textContent = 'Stellung angezeigt.'; }
+    catch (e) { statusEl.textContent = e.message; }
+  };
+
+  function computeCurrentPosition() {
+    busy('ChessDB wird abgefragt …');
+    showPosition();
+    return cdb.compute(null, {
+      interval: 5000,
+      maxAttempts: 12,
+      onProgress: function (p) {
+        if (p.phase === 'queue') {
+          statusEl.textContent = 'Stellung noch unbekannt – ChessDB-Analyse wird angefordert …';
+        } else if (p.phase === 'queued') {
+          statusEl.textContent = 'Analyse eingereiht. Neue Abfrage in ' + p.seconds + ' Sekunden …';
+        } else if (p.phase === 'query') {
+          statusEl.textContent = 'ChessDB wird erneut abgefragt … (' + p.attempt + '/' + p.maxAttempts + ')';
+        } else if (p.phase === 'waiting') {
+          statusEl.textContent = 'Noch in Berechnung. Nächste Abfrage in ' + p.seconds + ' Sekunden … (' + p.attempt + '/' + p.maxAttempts + ')';
+        }
+      }
+    }).then(function (r) {
+      if (r.status === 'pending') {
+        statusEl.textContent = 'ChessDB rechnet noch. Später erneut auf „ChessDB analysieren“ klicken.';
+        rawEl.textContent = JSON.stringify(r, null, 2);
+        rawEl.hidden = false;
+      } else {
+        statusEl.textContent = r.status === 'ok' ? 'ChessDB-Ergebnis' : ('ChessDB: ' + (r.status || 'Antwort'));
+        renderMoves(r);
+      }
+      return r;
+    }).catch(function (e) {
+      statusEl.textContent = 'Fehler: ' + e.message;
+      throw e;
+    });
+  }
+
+  document.getElementById('analyse').onclick = function () {
+    computeCurrentPosition();
+  };
+
+  document.getElementById('pv').onclick = function () {
+    busy('PV wird abgefragt …');
+    cdb.pv().then(function (r) {
+      statusEl.textContent = 'Principal Variation';
+      rawEl.textContent = typeof r.raw === 'string' ? r.raw : JSON.stringify(r, null, 2);
+      rawEl.hidden = false;
+    }).catch(function (e) { statusEl.textContent = 'Fehler: ' + e.message; });
+  };
+
+  document.getElementById('deepen').onclick = function () {
+    busy('Stellung wird zur ChessDB-Analyse eingereiht …');
+    cdb.deepen().then(function (r) {
+      if (r.status === 'ok') {
+        statusEl.textContent = 'Deepen akzeptiert. Automatische Kontrolle startet in 5 Sekunden …';
+        return new Promise(function (resolve) { setTimeout(resolve, 5000); }).then(computeCurrentPosition);
+      }
+      statusEl.textContent = 'ChessDB hat geantwortet.';
+      rawEl.textContent = JSON.stringify(r, null, 2);
+      rawEl.hidden = false;
+      return r;
+    }).catch(function (e) { statusEl.textContent = 'Fehler: ' + e.message; });
+  };
+
+  window.addEventListener('resize', function () { board.resize(); });
+})();
+</script>
+</body>
+</html>
