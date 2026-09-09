@@ -72,12 +72,57 @@
     return piece && piece.charAt(0) === game.turn();
   }
 
+  // chessboard3.js creates the coordinates as real 3D text meshes on all four edges.
+  // Keep that native 3D notation, but make it smaller/closer and show only one file edge
+  // and one rank edge at a time. No HTML labels are placed around the canvas.
+  function tune3DNotation(scene) {
+    if (!scene || !scene.children) return;
+
+    var camera = null;
+    scene.children.forEach(function (obj) {
+      if (!camera && obj instanceof THREE.PerspectiveCamera) camera = obj;
+    });
+    if (!camera) return;
+
+    var preferPositiveZ = camera.position.z >= 0;
+    var preferPositiveX;
+    if (Math.abs(camera.position.x) < 0.35) {
+      // Straight white view: numbers on the visually left edge.
+      preferPositiveX = false;
+    } else {
+      preferPositiveX = camera.position.x > 0;
+    }
+
+    scene.children.forEach(function (obj) {
+      if (!obj || !obj.geometry || !obj.position) return;
+
+      var isFileLabel = Math.abs(obj.position.z) > 8.4 && Math.abs(obj.position.x) < 8.4;
+      var isRankLabel = Math.abs(obj.position.x) > 8.4 && Math.abs(obj.position.z) < 8.4;
+      if (!isFileLabel && !isRankLabel) return;
+
+      obj.scale.set(0.64, 0.64, 0.64);
+
+      if (isFileLabel) {
+        var positiveZ = obj.position.z > 0;
+        obj.position.z = positiveZ ? 8.55 : -8.55;
+        obj.visible = positiveZ === preferPositiveZ;
+      } else {
+        var positiveX = obj.position.x > 0;
+        obj.position.x = positiveX ? 8.55 : -8.55;
+        obj.visible = positiveX === preferPositiveX;
+      }
+    });
+  }
+
   var board = new ChessBoard3('board', {
     position: 'start',
     draggable: true,
     rotateControls: true,
     zoomControls: true,
     pieceSet: 'assets/chesspieces/classic/{piece}.json',
+    onRender: function (scene) {
+      tune3DNotation(scene);
+    },
     onDragStart: function (source, piece) {
       if (!isBoardSquare(source)) return false;
       if (typeof game.game_over === 'function' && game.game_over()) return false;
@@ -112,6 +157,10 @@
       setTimeout(function () { computeCurrentPosition(false); }, 0);
     }
   });
+
+  // Font/notation is loaded asynchronously; these rerenders catch it without changing layout.
+  setTimeout(function () { board.rerender(); }, 300);
+  setTimeout(function () { board.rerender(); }, 900);
 
   cdb = ChessBoard3ChessDB.attach(board, {
     endpoint: 'chessdb-proxy.php',
