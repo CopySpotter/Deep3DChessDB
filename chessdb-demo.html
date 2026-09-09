@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>chessboard3.js + ChessDB</title>
+  <title>Deep3DChessDB</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; background: #f4f4f4; color: #222; }
     main { max-width: 1180px; margin: 0 auto; padding: 24px; }
@@ -24,8 +24,8 @@
 </head>
 <body>
 <main>
-  <h1>chessboard3.js + ChessDB</h1>
-  <p class="muted">3D-Brett als Anzeige, ChessDB als Cloud-Analyse. Für korrekte Analyse immer eine vollständige FEN verwenden.</p>
+  <h1>Deep3DChessDB</h1>
+  <p class="muted">Spielbares 3D-Brett mit legalen Schachzügen und ChessDB-Cloudanalyse. Nach jedem legalen Zug wird die vollständige FEN aktualisiert und ChessDB automatisch neu abgefragt.</p>
   <div class="layout">
     <div class="card"><div id="board"></div></div>
     <div class="card">
@@ -46,6 +46,8 @@
 
 <!-- chessboard3.js was built for the classic THREE global API (tested around r80). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/80/three.min.js"></script>
+<!-- chess.js provides legal move validation and complete FEN state. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="js/chessboard3.js"></script>
 <script src="js/chessboard3.chessdb.js"></script>
 <script>
@@ -54,20 +56,77 @@
   var statusEl = document.getElementById('status');
   var movesEl = document.getElementById('moves');
   var rawEl = document.getElementById('raw');
+  var game = new Chess();
+  var pendingMove = null;
+  var analysisGeneration = 0;
+  var cdb;
+
+  function isBoardSquare(square) {
+    return /^[a-h][1-8]$/.test(String(square || ''));
+  }
+
+  function pieceMatchesTurn(piece) {
+    return piece && piece.charAt(0) === game.turn();
+  }
+
   var board = new ChessBoard3('board', {
     position: 'start',
-    draggable: false,
-    pieceTheme: 'classic'
+    draggable: true,
+    pieceSet: 'assets/chesspieces/classic/{piece}.json',
+    onDragStart: function (source, piece) {
+      if (!isBoardSquare(source)) return false;
+      if (typeof game.game_over === 'function' && game.game_over()) return false;
+      return pieceMatchesTurn(piece);
+    },
+    onDrop: function (source, target) {
+      if (!isBoardSquare(source) || !isBoardSquare(target)) return 'snapback';
+
+      var move = null;
+      try {
+        move = game.move({ from: source, to: target, promotion: 'q' });
+      } catch (e) {
+        move = null;
+      }
+
+      if (move === null) {
+        statusEl.textContent = 'Illegaler Zug – Figur wurde zurückgesetzt.';
+        return 'snapback';
+      }
+
+      pendingMove = move;
+      fenEl.value = game.fen();
+    },
+    onSnapEnd: function () {
+      if (!pendingMove) return;
+      var san = pendingMove.san;
+      pendingMove = null;
+
+      // Synchronisiert Sonderzüge wie Rochade, en passant und Umwandlung.
+      board.position(game.fen(), false);
+      statusEl.textContent = san + ' gespielt – ChessDB wird aktualisiert …';
+      setTimeout(function () { computeCurrentPosition(false); }, 0);
+    }
   });
-  var cdb = ChessBoard3ChessDB.attach(board, {
+
+  cdb = ChessBoard3ChessDB.attach(board, {
     endpoint: 'chessdb-proxy.php',
     learn: true,
     getFen: function () { return fenEl.value.trim(); }
   });
 
-  function showPosition() {
+  function loadFenFromInput(animate) {
     var fen = fenEl.value.trim();
-    board.position(fen, true); // chessboard3 intentionally uses only piece placement
+    var loaded = false;
+    try {
+      loaded = game.load(fen);
+    } catch (e) {
+      loaded = false;
+    }
+    if (!loaded) throw new Error('Ungültige FEN.');
+
+    fenEl.value = game.fen();
+    board.position(game.fen(), animate !== false);
+    return game.fen();
   }
 
   function busy(text) {
@@ -82,6 +141,13 @@
     });
   }
 
+  function formatScore(score) {
+    if (score == null || score === '' || score === '??') return '??';
+    var n = Number(score);
+    if (!Number.isFinite(n)) return String(score);
+    return (n / 100).toFixed(2);
+  }
+
   function renderMoves(result) {
     var moves = ChessBoard3ChessDB.normalizeMoves(result);
     if (!moves.length) {
@@ -93,7 +159,7 @@
     var html = '<table><thead><tr><th>Zug</th><th>Score</th><th>Rank</th><th>Winrate</th><th>Note</th></tr></thead><tbody>';
     moves.slice(0, 12).forEach(function (m) {
       html += '<tr><td><strong>' + esc(m.san || m.uci || m.move) + '</strong></td>' +
-        '<td>' + esc(m.score != null ? (Number(m.score) / 100).toFixed(2) : '') + '</td>' +
+        '<td>' + esc(formatScore(m.score)) + '</td>' +
         '<td>' + esc(m.rank) + '</td><td>' + esc(m.winrate) + '</td><td>' + esc(m.note) + '</td></tr>';
     });
     html += '</tbody></table>';
@@ -101,17 +167,34 @@
   }
 
   document.getElementById('show').onclick = function () {
-    try { showPosition(); statusEl.textContent = 'Stellung angezeigt.'; }
-    catch (e) { statusEl.textContent = e.message; }
+    analysisGeneration++;
+    try {
+      loadFenFromInput(true);
+      statusEl.textContent = 'Stellung geladen. Figuren können legal gezogen werden.';
+    } catch (e) {
+      statusEl.textContent = e.message;
+    }
   };
 
-  function computeCurrentPosition() {
+  function computeCurrentPosition(reloadFen) {
+    var generation = ++analysisGeneration;
+    var fen;
+
+    try {
+      fen = reloadFen === false ? game.fen() : loadFenFromInput(true);
+    } catch (e) {
+      statusEl.textContent = e.message;
+      return Promise.reject(e);
+    }
+
     busy('ChessDB wird abgefragt …');
-    showPosition();
-    return cdb.compute(null, {
+    fenEl.value = fen;
+
+    return cdb.compute(fen, {
       interval: 5000,
       maxAttempts: 12,
       onProgress: function (p) {
+        if (generation !== analysisGeneration) return;
         if (p.phase === 'queue') {
           statusEl.textContent = 'Stellung noch unbekannt – ChessDB-Analyse wird angefordert …';
         } else if (p.phase === 'queued') {
@@ -123,6 +206,7 @@
         }
       }
     }).then(function (r) {
+      if (generation !== analysisGeneration) return r;
       if (r.status === 'pending') {
         statusEl.textContent = 'ChessDB rechnet noch. Später erneut auf „ChessDB analysieren“ klicken.';
         rawEl.textContent = JSON.stringify(r, null, 2);
@@ -133,36 +217,61 @@
       }
       return r;
     }).catch(function (e) {
-      statusEl.textContent = 'Fehler: ' + e.message;
+      if (generation === analysisGeneration) statusEl.textContent = 'Fehler: ' + e.message;
       throw e;
     });
   }
 
   document.getElementById('analyse').onclick = function () {
-    computeCurrentPosition();
+    computeCurrentPosition(true).catch(function () {});
   };
 
   document.getElementById('pv').onclick = function () {
+    var generation = ++analysisGeneration;
+    var fen;
+    try {
+      fen = loadFenFromInput(false);
+    } catch (e) {
+      statusEl.textContent = e.message;
+      return;
+    }
     busy('PV wird abgefragt …');
-    cdb.pv().then(function (r) {
+    cdb.pv(fen).then(function (r) {
+      if (generation !== analysisGeneration) return;
       statusEl.textContent = 'Principal Variation';
       rawEl.textContent = typeof r.raw === 'string' ? r.raw : JSON.stringify(r, null, 2);
       rawEl.hidden = false;
-    }).catch(function (e) { statusEl.textContent = 'Fehler: ' + e.message; });
+    }).catch(function (e) {
+      if (generation === analysisGeneration) statusEl.textContent = 'Fehler: ' + e.message;
+    });
   };
 
   document.getElementById('deepen').onclick = function () {
+    var generation = ++analysisGeneration;
+    var fen;
+    try {
+      fen = loadFenFromInput(false);
+    } catch (e) {
+      statusEl.textContent = e.message;
+      return;
+    }
     busy('Stellung wird zur ChessDB-Analyse eingereiht …');
-    cdb.deepen().then(function (r) {
+    cdb.deepen(fen).then(function (r) {
+      if (generation !== analysisGeneration) return r;
       if (r.status === 'ok') {
         statusEl.textContent = 'Deepen akzeptiert. Automatische Kontrolle startet in 5 Sekunden …';
-        return new Promise(function (resolve) { setTimeout(resolve, 5000); }).then(computeCurrentPosition);
+        return new Promise(function (resolve) { setTimeout(resolve, 5000); }).then(function () {
+          if (generation === analysisGeneration) return computeCurrentPosition(false);
+          return r;
+        });
       }
       statusEl.textContent = 'ChessDB hat geantwortet.';
       rawEl.textContent = JSON.stringify(r, null, 2);
       rawEl.hidden = false;
       return r;
-    }).catch(function (e) { statusEl.textContent = 'Fehler: ' + e.message; });
+    }).catch(function (e) {
+      if (generation === analysisGeneration) statusEl.textContent = 'Fehler: ' + e.message;
+    });
   };
 
   window.addEventListener('resize', function () { board.resize(); });
