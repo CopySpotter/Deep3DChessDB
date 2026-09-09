@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Hinzugefügt
+
+- `start.cmd` für Windows: startet den lokalen PHP-Server auf Port 8011 und öffnet Deep3DChessDB automatisch im Standardbrowser
+
 ## 0.1.1 - 2026-09-10
 
 Kleines Darstellungs- und Bedienungsrelease auf Basis des stabilen v0.1.0-Layouts.
