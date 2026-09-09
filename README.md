@@ -8,7 +8,7 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Funktionsumfang v0.1.0
+## Funktionsumfang v0.1.1
 
 - interaktives 3D-Schachbrett auf Basis von chessboard3.js
 - legale Drag-and-drop-Züge mit chess.js
@@ -26,12 +26,18 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 - robuste Behandlung unbekannter Scores ohne `NaN`
 - Same-Origin-PHP-Proxy mit HTTPS- und HTTP-Fallback für ChessDB
 - verständlichere Proxy- und Verbindungsfehler in der Oberfläche
+- 3D-Ansicht mit Maus drehen und kippen
+- Mausrad-Zoom
+- kleinere Koordinaten als echte 3D-Objekte direkt am Brett
+- Buchstaben und Zahlen jeweils nur an einer Brettkante
+- Button **Brett drehen** zum Wechsel der Orientierung
 
 ## Schnellstart unter Windows
 
-Im Projektordner:
+Deep3DChessDB kann jederzeit direkt aus dem Projektordner gestartet werden. In PowerShell in den Ordner wechseln und den lokalen PHP-Server starten:
 
 ```powershell
+cd D:\Deep3DChessDB-repo\Deep3DChessDB
 php -S 127.0.0.1:8011
 ```
 
@@ -40,6 +46,8 @@ Dann im Browser öffnen:
 ```text
 http://127.0.0.1:8011/chessdb-demo.html
 ```
+
+Der Server läuft so lange, wie dieses PowerShell-Fenster geöffnet bleibt. Beenden mit `Strg+C`. Beim nächsten Start genügt derselbe Befehl wieder.
 
 Falls PHP noch nicht installiert ist, kann PHP unter Windows zum Beispiel über `winget` installiert werden:
 
@@ -58,7 +66,7 @@ sudo apt update
 sudo apt install php-cli
 ```
 
-Dann:
+Dann im Projektordner:
 
 ```bash
 php -S 127.0.0.1:8011
@@ -73,6 +81,8 @@ http://127.0.0.1:8011/chessdb-demo.html
 ## Bedienung
 
 Eine vollständige FEN kann in das Eingabefeld geschrieben und mit **Am Brett anzeigen** geladen werden. Danach können die Figuren direkt auf dem 3D-Brett gezogen werden. Illegale Züge springen zurück; legale Züge aktualisieren FEN und ChessDB automatisch.
+
+Die freie Brettfläche kann mit gedrückter Maustaste gedreht und gekippt werden. Mit dem Mausrad wird gezoomt. **Brett drehen** wechselt die Orientierung zwischen Weiß und Schwarz.
 
 Zusätzlich stehen **ChessDB analysieren**, **PV** und **Deepen** zur Verfügung.
 
@@ -132,7 +142,7 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Nächste Schritte
 
-Als Nächstes sollen ChessDB-Kandidatenzüge direkt anklickbar werden, die Brettorientierung verbessert und Schach/Matt/Patt deutlicher angezeigt werden. Danach folgen PGN-Unterstützung, Zugliste und Variantenbaum.
+Als Nächstes sollen ChessDB-Kandidatenzüge direkt anklickbar werden und Schach/Matt/Patt deutlicher angezeigt werden. Danach folgen PGN-Unterstützung, Zugliste und Variantenbaum.
 
 Siehe [`ROADMAP.md`](ROADMAP.md).
 
@@ -145,4 +155,4 @@ Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Status
 
-**Version 0.1.0 – erster funktionsfähiger öffentlicher Prototyp.**
+**Version 0.1.1 – stabiler Darstellungs- und Bedienungsstand.**
