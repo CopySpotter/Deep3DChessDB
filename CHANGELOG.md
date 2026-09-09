@@ -1,14 +1,18 @@
 # Changelog
 
-## 0.1.1 - in Entwicklung
+## 0.1.1 - 2026-09-10
+
+Kleines Darstellungs- und Bedienungsrelease auf Basis des stabilen v0.1.0-Layouts.
 
 ### Geändert
 
 - 3D-Brett kann mit der Maus gedreht und gekippt werden
 - Mausrad-Zoom für die 3D-Ansicht
-- kleinere Koordinatenbeschriftung neben dem Brett
+- passende OrbitControls aus der Three.js-r80-Generation eingebunden
+- Koordinaten bleiben echte 3D-Objekte am Brett und wurden kleiner gesetzt
 - Buchstaben nur an einer Brettkante, Zahlen nur an einer Brettkante
-- Button „Brett drehen“ mit automatisch angepasster Koordinatenrichtung
+- Button „Brett drehen“ zum Wechsel der Orientierung
+- Brettlayout selbst bleibt gegenüber v0.1.0 unverändert
 
 ## 0.1.0 - 2026-09-10
 
