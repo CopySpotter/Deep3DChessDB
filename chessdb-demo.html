@@ -9,7 +9,39 @@
     main { max-width: 1180px; margin: 0 auto; padding: 24px; }
     h1 { margin-top: 0; }
     .layout { display: grid; grid-template-columns: minmax(420px, 2fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
-    #board { width: 100%; min-height: 420px; background: #ddd; }
+    .board-shell {
+      display: grid;
+      grid-template-columns: 14px minmax(0, 1fr);
+      grid-template-rows: auto 14px;
+      column-gap: 4px;
+      row-gap: 2px;
+      align-items: stretch;
+    }
+    #board { grid-column: 2; grid-row: 1; width: 100%; min-height: 0; background: #ddd; }
+    #board canvas { display: block; max-width: 100%; }
+    .rank-labels {
+      grid-column: 1;
+      grid-row: 1;
+      display: grid;
+      grid-template-rows: repeat(8, 1fr);
+      align-items: center;
+      justify-items: end;
+      font: 10px/1 ui-monospace, monospace;
+      color: #777;
+      user-select: none;
+    }
+    .file-labels {
+      grid-column: 2;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      align-items: start;
+      justify-items: center;
+      font: 10px/1 ui-monospace, monospace;
+      color: #777;
+      user-select: none;
+    }
+    .board-hint { margin: 6px 0 0 18px; color: #777; font-size: 11px; }
     .card { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
     textarea { width: 100%; min-height: 72px; box-sizing: border-box; font: 13px ui-monospace, monospace; }
     button { margin: 8px 6px 0 0; padding: 8px 12px; cursor: pointer; }
@@ -19,7 +51,9 @@
     pre { white-space: pre-wrap; word-break: break-word; background: #f7f7f7; padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; }
     .muted { color: #666; font-size: 13px; }
     .status { min-height: 1.4em; margin-top: 8px; }
-    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } #board { min-height: 320px; } }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -27,7 +61,18 @@
   <h1>Deep3DChessDB</h1>
   <p class="muted">Spielbares 3D-Brett mit legalen Schachzügen und ChessDB-Cloudanalyse. Nach jedem legalen Zug wird die vollständige FEN aktualisiert und ChessDB automatisch neu abgefragt.</p>
   <div class="layout">
-    <div class="card"><div id="board"></div></div>
+    <div class="card">
+      <div class="board-shell">
+        <div class="rank-labels" id="rankLabels" aria-hidden="true">
+          <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+        </div>
+        <div id="board"></div>
+        <div class="file-labels" id="fileLabels" aria-hidden="true">
+          <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+        </div>
+      </div>
+      <p class="board-hint">Freie Brettfläche ziehen: drehen/kippen · Mausrad: zoomen</p>
+    </div>
     <div class="card">
       <label for="fen"><strong>FEN</strong></label>
       <textarea id="fen">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</textarea>
@@ -36,6 +81,7 @@
         <button id="analyse">ChessDB analysieren</button>
         <button id="pv">PV</button>
         <button id="deepen">Deepen</button>
+        <button id="flip">Brett drehen</button>
       </div>
       <div class="status" id="status"></div>
       <div id="moves"></div>
@@ -46,6 +92,8 @@
 
 <!-- chessboard3.js was built for the classic THREE global API (tested around r80). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/80/three.min.js"></script>
+<!-- OrbitControls matching the same three.js r80 generation. -->
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r80/examples/js/controls/OrbitControls.js"></script>
 <!-- chess.js provides legal move validation and complete FEN state. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="js/chessboard3.js"></script>
@@ -56,6 +104,8 @@
   var statusEl = document.getElementById('status');
   var movesEl = document.getElementById('moves');
   var rawEl = document.getElementById('raw');
+  var fileLabelsEl = document.getElementById('fileLabels');
+  var rankLabelsEl = document.getElementById('rankLabels');
   var game = new Chess();
   var pendingMove = null;
   var analysisGeneration = 0;
@@ -69,9 +119,28 @@
     return piece && piece.charAt(0) === game.turn();
   }
 
+  function setLabels(el, values) {
+    el.innerHTML = values.map(function (value) {
+      return '<span>' + value + '</span>';
+    }).join('');
+  }
+
+  function updateCoordinateLabels() {
+    var isBlack = board.orientation() === 'black';
+    setLabels(fileLabelsEl, isBlack ?
+      ['h','g','f','e','d','c','b','a'] :
+      ['a','b','c','d','e','f','g','h']);
+    setLabels(rankLabelsEl, isBlack ?
+      ['1','2','3','4','5','6','7','8'] :
+      ['8','7','6','5','4','3','2','1']);
+  }
+
   var board = new ChessBoard3('board', {
     position: 'start',
     draggable: true,
+    showNotation: false,
+    rotateControls: true,
+    zoomControls: true,
     pieceSet: 'assets/chesspieces/classic/{piece}.json',
     onDragStart: function (source, piece) {
       if (!isBoardSquare(source)) return false;
@@ -107,6 +176,8 @@
       setTimeout(function () { computeCurrentPosition(false); }, 0);
     }
   });
+
+  updateCoordinateLabels();
 
   cdb = ChessBoard3ChessDB.attach(board, {
     endpoint: 'chessdb-proxy.php',
@@ -174,6 +245,11 @@
     } catch (e) {
       statusEl.textContent = e.message;
     }
+  };
+
+  document.getElementById('flip').onclick = function () {
+    board.flip();
+    updateCoordinateLabels();
   };
 
   function computeCurrentPosition(reloadFen) {
