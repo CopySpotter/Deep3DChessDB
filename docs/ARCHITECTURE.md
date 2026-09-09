@@ -2,13 +2,24 @@
 
 ## Ziel
 
-Das Projekt verbindet einen 3D-Schachbrett-Renderer mit ChessDB, ohne die ursprüngliche chessboard3.js-Bibliothek tiefgreifend umzubauen.
+Deep3DChessDB verbindet einen 3D-Schachbrett-Renderer mit einem vollständigen Regelzustand und ChessDB, ohne die ursprüngliche chessboard3.js-Bibliothek tiefgreifend umzubauen.
 
 ## Komponenten
 
 ### `js/chessboard3.js`
 
-Originaler 3D-Brettrenderer. Er kennt Figurenpositionen, aber keine vollständigen Schachregeln und keine komplette FEN-Zustandslogik.
+3D-Brettrenderer. Er verwaltet Figurenpositionen und Drag-and-drop auf dem Brett, kennt aber selbst keine vollständigen Schachregeln.
+
+### `chess.js`
+
+Regelkern im Demo-Frontend. Er ist die Quelle der Wahrheit für:
+
+- Zugrecht,
+- legale und illegale Züge,
+- Rochade,
+- en passant,
+- Bauernumwandlung,
+- vollständige FEN nach jedem Zug.
 
 ### `js/chessboard3.chessdb.js`
 
@@ -16,27 +27,44 @@ Integrationsschicht für ChessDB. Sie:
 
 - baut API-Anfragen auf,
 - normalisiert ChessDB-Antworten,
+- behandelt unbekannte Scores robust,
 - stellt `analyze`, `best`, `score`, `pv`, `deepen` und `compute` bereit,
-- kann unbekannte Stellungen automatisch einreihen und erneut abfragen.
+- kann unbekannte Stellungen automatisch einreihen und erneut abfragen,
+- gibt Proxy-Fehler verständlicher an das Frontend weiter.
 
 ### `chessdb-proxy.php`
 
-Same-Origin-Proxy zwischen Browser und `https://www.chessdb.cn/cdb.php`.
+Same-Origin-Proxy zwischen Browser und ChessDB.
 
 Gründe:
 
 - Browser-CORS,
-- ein klarer kontrollierter Satz erlaubter ChessDB-Actions,
-- zentrale Stelle für Timeouts und spätere Caches/Rate-Limits.
+- kontrollierter Satz erlaubter ChessDB-Actions,
+- zentrale Stelle für Timeouts und spätere Caches/Rate-Limits,
+- HTTPS-Aufruf mit HTTP-Fallback bei Verbindungsproblemen oder 5xx-Antworten.
 
 ### `chessdb-demo.html`
 
-Aktuelle Benutzeroberfläche und Referenzimplementierung für die Integrationsschicht.
+Benutzeroberfläche und Referenzimplementierung. Sie verbindet 3D-Brett, chess.js und ChessDB.
 
-## Ablauf einer bekannten Stellung
+## Ablauf eines Benutzerzugs
 
 ```text
-FEN -> queryall -> ChessDB -> Zugliste -> Tabelle im Browser
+Benutzer zieht Figur
+        ↓
+     chess.js
+        ↓
+legal? ── nein ──> Snapback
+  │
+  ja
+  ↓
+vollständige FEN
+  ↓
+3D-Brett synchronisieren
+  ↓
+ChessDB queryall
+  ↓
+Kandidatenzüge / Bewertung / PV
 ```
 
 ## Ablauf einer unbekannten Stellung
@@ -59,20 +87,24 @@ Wiederholung bis Ergebnis oder Versuchslimit
 
 Dieses Verhalten orientiert sich an der offiziellen ChessDB-Abfrageoberfläche.
 
-## Wichtige Grenze des aktuellen Prototyps
+## Zustandsmodell
 
-Das Brett selbst ist noch keine Schach-Engine. Die eingegebene vollständige FEN ist derzeit die Quelle der Wahrheit. Erst mit einer Regelbibliothek wie `chess.js` kann aus interaktiven Zügen zuverlässig die nächste vollständige FEN erzeugt werden.
+`chess.js` ist für den Schachzustand maßgeblich. Das 3D-Brett wird nach legalen Zügen aus diesem Zustand synchronisiert. Damit bleiben auch Sonderzüge und FEN-Zusatzinformationen korrekt.
 
-## Geplante Zielarchitektur
+ChessDB erhält ausschließlich vollständige FENs aus dem Regelzustand und verändert selbst keinen Spielzustand.
+
+## Zielarchitektur
 
 ```text
 PGN / Benutzereingabe
         ↓
-   Regel-Engine
+      chess.js
         ↓
  vollständige FEN
    ↙          ↘
 3D-Brett     ChessDB
                 ↓
         Analyse / PV / Zugwahl
+                ↓
+       Varianten / Partieanalyse
 ```
