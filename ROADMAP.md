@@ -1,9 +1,9 @@
 # Roadmap
 
-## 0.1.0 – erster funktionsfähiger Prototyp
+## 0.1 – ChessDB-FEN-Prototyp
 
 - [x] 3D-Brett
-- [x] vollständige FEN eingeben und laden
+- [x] vollständige FEN eingeben
 - [x] `queryall`
 - [x] `querypv`
 - [x] `querybest`
@@ -11,23 +11,23 @@
 - [x] `queue` / Deepen
 - [x] automatische Wiederholungsabfrage bei unbekannten Stellungen
 - [x] PHP-CORS-Proxy
-- [x] robuste Behandlung von `??`-Scores
-- [x] HTTPS-/HTTP-Fallback im ChessDB-Proxy
-- [x] Regel-Engine (`chess.js`)
+
+## 0.1.1 – Kamera und Brettdarstellung (aktuell)
+
+- [x] 3D-Brett mit der Maus drehen und kippen
+- [x] Mausrad-Zoom
+- [x] kleinere Koordinaten außerhalb des Bretts
+- [x] Buchstaben und Zahlen jeweils nur an einer Brettkante
+- [x] Brett-Flip mit angepassten Koordinaten
+
+## 0.2 – Spielbares Analysebrett
+
+- [x] Regel-Engine (`chess.js`) integrieren
 - [x] legale Drag-and-drop-Züge
 - [x] vollständige FEN nach jedem Zug
-- [x] ChessDB nach jedem legalen Zug automatisch aktualisieren
-- [x] Rochade, en passant und Umwandlung synchronisieren
-
-## 0.2 – Analysebrett ausbauen
-
+- [x] ChessDB nach jedem Zug automatisch aktualisieren
 - [ ] ChessDB-Kandidatenzüge anklickbar machen
-- [ ] Kandidatenzug direkt auf dem 3D-Brett ausführen
-- [ ] Brettorientierung / Flip verbessern
-- [ ] 3D-Kamera komfortabler drehen und zoomen
-- [ ] Status für Schach, Matt und Patt anzeigen
-- [ ] laufende ChessDB-Abfragen bei Stellungswechsel sauber abbrechen
-- [ ] Bedienung und Darstellung auf kleineren Displays verbessern
+- [ ] Status für Schach, Matt, Patt und illegale Züge
 
 ## 0.3 – Varianten und Partie
 
