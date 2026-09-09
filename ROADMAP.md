@@ -12,13 +12,14 @@
 - [x] automatische Wiederholungsabfrage bei unbekannten Stellungen
 - [x] PHP-CORS-Proxy
 
-## 0.1.1 – Kamera und Brettdarstellung (aktuell)
+## 0.1.1 – Kamera und Brettdarstellung
 
 - [x] 3D-Brett mit der Maus drehen und kippen
 - [x] Mausrad-Zoom
-- [x] kleinere Koordinaten außerhalb des Bretts
+- [x] kleinere Koordinaten direkt am 3D-Brett
 - [x] Buchstaben und Zahlen jeweils nur an einer Brettkante
-- [x] Brett-Flip mit angepassten Koordinaten
+- [x] Brett-Flip
+- [x] ursprüngliches v0.1.0-Brettlayout beibehalten
 
 ## 0.2 – Spielbares Analysebrett
 
