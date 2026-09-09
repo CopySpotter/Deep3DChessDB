@@ -34,7 +34,9 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 ## Schnellstart unter Windows
 
-Deep3DChessDB kann jederzeit direkt aus dem Projektordner gestartet werden. In PowerShell in den Ordner wechseln und den lokalen PHP-Server starten:
+Am einfachsten geht es mit **`start.cmd`** im Projektordner: Doppelklick darauf genügt. Das Skript startet den lokalen PHP-Server auf Port `8011` und öffnet Deep3DChessDB automatisch im Standardbrowser.
+
+Alternativ kann Deep3DChessDB jederzeit direkt aus PowerShell gestartet werden:
 
 ```powershell
 cd D:\Deep3DChessDB-repo\Deep3DChessDB
@@ -47,7 +49,7 @@ Dann im Browser öffnen:
 http://127.0.0.1:8011/chessdb-demo.html
 ```
 
-Der Server läuft so lange, wie dieses PowerShell-Fenster geöffnet bleibt. Beenden mit `Strg+C`. Beim nächsten Start genügt derselbe Befehl wieder.
+Der Server läuft so lange, wie sein Konsolenfenster geöffnet bleibt. Beenden mit `Strg+C`. Beim nächsten Start kann wieder `start.cmd` oder derselbe PowerShell-Befehl verwendet werden.
 
 Falls PHP noch nicht installiert ist, kann PHP unter Windows zum Beispiel über `winget` installiert werden:
 
@@ -126,6 +128,7 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ```text
 .
+├── start.cmd                    Windows-One-Click-Start
 ├── chessdb-demo.html            Demo und spielbares Analysebrett
 ├── chessdb-proxy.php            Same-Origin-Proxy zu ChessDB
 ├── js/
