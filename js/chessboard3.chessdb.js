@@ -79,8 +79,6 @@
     return this._request('queue', fen, { json: 0 });
   };
 
-
-
   function sleep(ms) {
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
@@ -89,7 +87,7 @@
     if (!result) return true;
     if (result.status === 'unknown') return true;
     var moves = normalizeMoves(result);
-    if (moves.length && (moves[0].score === '??' || moves[0].score == null) && result.status !== 'ok') return true;
+    if (moves.length && moves[0].score == null && result.status !== 'ok') return true;
     return false;
   }
 
@@ -129,9 +127,17 @@
 
   function normalizeMoves(result) {
     if (!result) return [];
-    if (Array.isArray(result.moves)) return result.moves;
-    if (result.data && Array.isArray(result.data.moves)) return result.data.moves;
-    return [];
+    var moves = [];
+    if (Array.isArray(result.moves)) moves = result.moves;
+    else if (result.data && Array.isArray(result.data.moves)) moves = result.data.moves;
+
+    return moves.map(function (move) {
+      if (!move || move.score !== '??') return move;
+      var copy = {};
+      Object.keys(move).forEach(function (key) { copy[key] = move[key]; });
+      copy.score = null;
+      return copy;
+    });
   }
 
   /**
