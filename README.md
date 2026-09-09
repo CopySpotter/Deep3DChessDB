@@ -1,49 +1,80 @@
-# chessboard3js + ChessDB
+# Deep3DChessDB
 
-3D-Schachbrett auf Basis von **chessboard3.js 0.1.3** mit Anbindung an die öffentliche **ChessDB Cloud Database**.
+Interaktives 3D-Schachbrett mit **ChessDB-Anbindung** für Stellungsanalyse, Kandidatenzüge und Hauptvarianten.
 
-Der aktuelle Stand ist ein Analyse-Prototyp: Eine vollständige FEN wird auf dem 3D-Brett angezeigt und gegen ChessDB abgefragt. Bekannte Stellungen liefern Kandidatenzüge, Bewertungen und Hauptvarianten. Unbekannte Stellungen können automatisch zur Analyse eingereiht und anschließend erneut abgefragt werden.
+Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Regelkern und die öffentliche **ChessDB Cloud Database** als Analysequelle. Figuren können legal gezogen werden; nach jedem Zug wird die vollständige FEN aktualisiert und ChessDB automatisch neu abgefragt.
 
 ![Deep3DChessDB – 3D-Brett mit ChessDB-Analyse](docs/Deep3DChessDB-screenshot.png)
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Aktueller Funktionsumfang
+## Funktionsumfang v0.1.0
 
-- 3D-Brett mit den originalen chessboard3.js-Modellen
-- Eingabe einer vollständigen FEN
-- ChessDB `queryall`: Kandidatenzüge, Score, Rank, Winrate, Note
+- interaktives 3D-Schachbrett auf Basis von chessboard3.js
+- legale Drag-and-drop-Züge mit chess.js
+- Zugrecht, Rochade, en passant und Bauernumwandlung
+- automatische Aktualisierung der vollständigen FEN nach jedem legalen Zug
+- automatische ChessDB-Abfrage nach jedem Zug
+- ChessDB `queryall`: Kandidatenzüge, Score, Rank, Winrate und Note
 - ChessDB `querypv`: Principal Variation / Hauptvariante
-- ChessDB `querybest`, `queryscore`, `querysearch`
+- ChessDB `querybest`, `queryscore` und `querysearch`
 - `Deepen` / `queue`: Stellung zur weiteren ChessDB-Analyse einreihen
-- automatische Behandlung unbekannter Stellungen nach dem Muster der offiziellen ChessDB-Weboberfläche:
+- automatische Behandlung unbekannter Stellungen:
   - `queryall&learn=1&showall=1`
   - bei `unknown`: `queue`
   - danach erneute Abfrage alle 5 Sekunden
-- kleiner Same-Origin-PHP-Proxy, weil die ChessDB-API nicht für direkte Browser-CORS-Aufrufe ausgelegt ist
+- robuste Behandlung unbekannter Scores ohne `NaN`
+- Same-Origin-PHP-Proxy mit HTTPS- und HTTP-Fallback für ChessDB
+- verständlichere Proxy- und Verbindungsfehler in der Oberfläche
+
+## Schnellstart unter Windows
+
+Im Projektordner:
+
+```powershell
+php -S 127.0.0.1:8011
+```
+
+Dann im Browser öffnen:
+
+```text
+http://127.0.0.1:8011/chessdb-demo.html
+```
+
+Falls PHP noch nicht installiert ist, kann PHP unter Windows zum Beispiel über `winget` installiert werden:
+
+```powershell
+winget install --id PHP.PHP.8.4 -e
+```
+
+Danach die PowerShell neu öffnen.
 
 ## Schnellstart unter Linux
 
-PHP-CLI installieren, falls noch nicht vorhanden:
+Falls PHP-CLI noch fehlt:
 
 ```bash
 sudo apt update
 sudo apt install php-cli
 ```
 
-Dann im Projektordner:
+Dann:
 
 ```bash
 php -S 127.0.0.1:8011
 ```
 
-Im Browser öffnen:
+und im Browser:
 
 ```text
 http://127.0.0.1:8011/chessdb-demo.html
 ```
 
-Port `8011` ist bewusst gewählt, weil `8000` häufig schon von anderen lokalen Diensten belegt ist.
+## Bedienung
+
+Eine vollständige FEN kann in das Eingabefeld geschrieben und mit **Am Brett anzeigen** geladen werden. Danach können die Figuren direkt auf dem 3D-Brett gezogen werden. Illegale Züge springen zurück; legale Züge aktualisieren FEN und ChessDB automatisch.
+
+Zusätzlich stehen **ChessDB analysieren**, **PV** und **Deepen** zur Verfügung.
 
 ## Test-FEN
 
@@ -53,22 +84,44 @@ Startstellung:
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ```
 
-Beispiel einer taktischen Stellung:
+Taktische Teststellung:
 
 ```text
 3q1rk1/1bp3pp/p1n3p1/8/Bp1P4/6N1/PPP1QnP1/R3R1K1 b - - 0 1
 ```
 
+## Architektur
+
+```text
+Benutzerzug / FEN
+       ↓
+    chess.js
+       ↓
+chessboard3.js
+       ↓
+chessdb-demo.html
+       ↓
+js/chessboard3.chessdb.js
+       ↓
+chessdb-proxy.php
+       ↓
+     ChessDB
+```
+
+`chessboard3.js` rendert das 3D-Brett. `chess.js` verwaltet die Schachregeln und erzeugt die korrekte vollständige FEN. Die ChessDB-Schicht fragt die externe Analyse-Datenbank über den lokalen PHP-Proxy ab.
+
+Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Projektstruktur
 
 ```text
 .
-├── chessdb-demo.html            Demo-Oberfläche
-├── chessdb-proxy.php            Same-Origin-Proxy zu chessdb.cn
+├── chessdb-demo.html            Demo und spielbares Analysebrett
+├── chessdb-proxy.php            Same-Origin-Proxy zu ChessDB
 ├── js/
-│   ├── chessboard3.js           Originalbibliothek
+│   ├── chessboard3.js           3D-Renderer
 │   ├── chessboard3.min.js
-│   └── chessboard3.chessdb.js   Unsere ChessDB-Integrationsschicht
+│   └── chessboard3.chessdb.js   ChessDB-Integrationsschicht
 ├── assets/                      3D-Figuren und Fonts
 ├── docs/
 │   └── ARCHITECTURE.md
@@ -77,43 +130,19 @@ Beispiel einer taktischen Stellung:
 └── LICENSE
 ```
 
-## Architektur
+## Nächste Schritte
 
-`chessboard3.js` bleibt ein reiner Brett-Renderer. Die ChessDB-Schicht erwartet deshalb eine **vollständige FEN** einschließlich Zugrecht, Rochaderechten, en-passant-Feld und Zugzählern.
-
-```text
-FEN
- ↓
-chessdb-demo.html
- ↓
-js/chessboard3.chessdb.js
- ↓
-chessdb-proxy.php
- ↓
-https://www.chessdb.cn/cdb.php
-```
-
-Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-
-## Nächster Entwicklungsschritt
-
-Der Prototyp soll zu einem wirklich spielbaren Analysebrett werden:
-
-1. `chess.js` oder vergleichbare Regel-Engine integrieren.
-2. Figuren auf dem 3D-Brett legal ziehen können.
-3. Nach jedem Zug automatisch eine vollständige FEN erzeugen.
-4. ChessDB automatisch nach jedem Zug aktualisieren.
-5. Kandidatenzüge anklickbar machen und auf dem Brett ausführen.
-6. PGN laden, navigieren und später komplette Partien analysieren.
+Als Nächstes sollen ChessDB-Kandidatenzüge direkt anklickbar werden, die Brettorientierung verbessert und Schach/Matt/Patt deutlicher angezeigt werden. Danach folgen PGN-Unterstützung, Zugliste und Variantenbaum.
 
 Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Herkunft und Lizenz
 
 - **chessboard3.js**: Copyright 2016 Jason Tiscione; Teile Copyright 2013 Chris Oakman. MIT-Lizenz, siehe [`LICENSE`](LICENSE).
+- **chess.js**: wird im Demo-Frontend als Regel-Engine eingebunden.
 - **ChessDB**: externe Cloud-API von chessdb.cn. Dieses Projekt enthält keine ChessDB-Datenbankkopie und keinen ChessDB-Server. Der veröffentlichte ChessDB-Code steht unter der Unlicense/Public-Domain-Widmung.
-- Die zusätzliche Integrationsschicht in diesem Repository wird unter denselben permissiven Bedingungen des beigefügten MIT-Lizenztexts veröffentlicht.
+- Die zusätzliche Integrationsschicht in diesem Repository wird unter den permissiven Bedingungen des beigefügten MIT-Lizenztexts veröffentlicht.
 
 ## Status
 
-**Version 0.1.0 – experimenteller Prototyp.**
+**Version 0.1.0 – erster funktionsfähiger öffentlicher Prototyp.**
