@@ -21,14 +21,18 @@
 - [x] Brett-Flip
 - [x] ursprüngliches v0.1.0-Brettlayout beibehalten
 
-## 0.2 – Spielbares Analysebrett
+## 0.1.2 – Spielbares Analysebrett (in Vorbereitung)
 
 - [x] Regel-Engine (`chess.js`) integrieren
 - [x] legale Drag-and-drop-Züge
 - [x] vollständige FEN nach jedem Zug
 - [x] ChessDB nach jedem Zug automatisch aktualisieren
-- [ ] ChessDB-Kandidatenzüge anklickbar machen
-- [ ] Status für Schach, Matt, Patt und illegale Züge
+- [x] ChessDB-Kandidatenzüge anklickbar machen
+- [x] angeklickten ChessDB-Zug über `chess.js` legal ausführen
+- [x] FEN und Analyse nach Kandidatenzug automatisch aktualisieren
+- [x] Status für Zugrecht, Schach, Matt, Patt und Remiszustände
+- [ ] manuellen Regressionstest auf Linux/Browser vollständig abhaken
+- [ ] v0.1.2 taggen
 
 ## 0.3 – Varianten und Partie
 
