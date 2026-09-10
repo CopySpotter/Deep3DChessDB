@@ -21,7 +21,7 @@
 - [x] Brett-Flip
 - [x] ursprüngliches v0.1.0-Brettlayout beibehalten
 
-## 0.1.2 – Spielbares Analysebrett (in Vorbereitung)
+## 0.1.2 – Spielbares Analysebrett
 
 - [x] Regel-Engine (`chess.js`) integrieren
 - [x] legale Drag-and-drop-Züge
@@ -33,8 +33,13 @@
 - [x] Status für Zugrecht, Schach, Matt, Patt und Remiszustände
 - [x] Regressionstest-Checkliste anlegen
 - [x] Release-Dokumentation für v0.1.2 vorbereiten
-- [ ] manuellen Regressionstest auf Linux/Browser vollständig abhaken
-- [ ] v0.1.2 taggen
+- [x] manuellen Regressionstest auf Linux/Browser durchführen
+
+## 0.2 – Nächster Entwicklungsschritt
+
+- [ ] Kandidatenzüge optisch hervorheben
+- [ ] beste ChessDB-Empfehlung klar kennzeichnen
+- [ ] Spielstatus und Analyseanzeige weiter vereinheitlichen
 
 ## 0.3 – Varianten und Partie
 
