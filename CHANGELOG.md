@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased / v0.1.2 in Vorbereitung
+## 0.1.2 - 2026-09-10
+
+Spielbares Analysebrett mit direkt ausführbaren ChessDB-Kandidatenzügen und sichtbarem Spielstatus. Der Stand wurde unter Linux im Browser manuell getestet.
 
 ### Hinzugefügt
 
@@ -9,13 +11,20 @@
 - angeklickte ChessDB-Züge werden über `chess.js` legal ausgeführt und auf das 3D-Brett übertragen
 - nach einem ChessDB-Kandidatenzug werden FEN und ChessDB-Analyse automatisch aktualisiert
 - sichtbarer Spielstatus für Zugrecht, Schach, Schachmatt, Patt und Remiszustände
-- Regressionstest-Checkliste für den v0.1.2-Stand unter `docs/REGRESSION-v0.1.2.md`
+- Regressionstest-Checkliste unter `docs/REGRESSION-v0.1.2.md`
 
 ### Technisch
 
 - `chess.js` bleibt auch bei ChessDB-Zugvorschlägen die alleinige Quelle der Wahrheit für Legalität und vollständige FEN
 - veraltete laufende Analyseantworten werden weiterhin über `analysisGeneration` ignoriert
 - Bauernumwandlungen aus ChessDB werden ohne problematische Figurenanimation synchronisiert
+
+### Getestet
+
+- manueller Browser-Test unter Linux erfolgreich
+- Kandidatenzug aus ChessDB ausführbar
+- 3D-Brett, Drag-and-drop, Rotation, Zoom und Brett-Flip weiterhin funktionsfähig
+- Spielstatus für Zugrecht und Endzustände funktionsfähig
 
 ## 0.1.1 - 2026-09-10
 
