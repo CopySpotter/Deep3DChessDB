@@ -19,7 +19,10 @@ Regelkern im Demo-Frontend. Er ist die Quelle der Wahrheit für:
 - Rochade,
 - en passant,
 - Bauernumwandlung,
+- Schach, Schachmatt und Patt,
 - vollständige FEN nach jedem Zug.
+
+Auch ChessDB-Zugvorschläge werden niemals direkt in den Brettzustand geschrieben. Sie müssen zuerst durch `chess.js` laufen.
 
 ### `js/chessboard3.chessdb.js`
 
@@ -45,9 +48,9 @@ Gründe:
 
 ### `chessdb-demo.html`
 
-Benutzeroberfläche und Referenzimplementierung. Sie verbindet 3D-Brett, chess.js und ChessDB.
+Benutzeroberfläche und Referenzimplementierung. Sie verbindet 3D-Brett, chess.js und ChessDB. Auf dem aktuellen `main` rendert sie ChessDB-Kandidaten als Buttons, führt einen gewählten Kandidaten über `chess.js` aus und aktualisiert anschließend Brett, FEN, Spielstatus und Analyse.
 
-## Ablauf eines Benutzerzugs
+## Ablauf eines manuellen Benutzerzugs
 
 ```text
 Benutzer zieht Figur
@@ -58,7 +61,7 @@ legal? ── nein ──> Snapback
   │
   ja
   ↓
-vollständige FEN
+vollständige FEN + Spielstatus
   ↓
 3D-Brett synchronisieren
   ↓
@@ -66,6 +69,30 @@ ChessDB queryall
   ↓
 Kandidatenzüge / Bewertung / PV
 ```
+
+## Ablauf eines ChessDB-Kandidatenzugs
+
+```text
+ChessDB-Kandidat (UCI)
+        ↓
+    UCI zerlegen
+        ↓
+     chess.js
+        ↓
+legal? ── nein ──> verwerfen / neu analysieren
+  │
+  ja
+  ↓
+vollständige FEN + Spielstatus
+  ↓
+3D-Brett synchronisieren
+  ↓
+alte Kandidatenliste verwerfen
+  ↓
+ChessDB für Folgestellung neu abfragen
+```
+
+Damit bleibt ChessDB eine Analysequelle. Die externe Datenbank verändert den Spielzustand niemals direkt.
 
 ## Ablauf einer unbekannten Stellung
 
@@ -87,24 +114,28 @@ Wiederholung bis Ergebnis oder Versuchslimit
 
 Dieses Verhalten orientiert sich an der offiziellen ChessDB-Abfrageoberfläche.
 
+## Asynchroner Zustand
+
+Jede neue Analyse erhöht `analysisGeneration`. Antworten älterer Abfragen werden nur übernommen, wenn ihre Generation noch aktuell ist. Dadurch überschreibt eine verspätete ChessDB-Antwort nicht die bereits weitergespielte Stellung.
+
 ## Zustandsmodell
 
-`chess.js` ist für den Schachzustand maßgeblich. Das 3D-Brett wird nach legalen Zügen aus diesem Zustand synchronisiert. Damit bleiben auch Sonderzüge und FEN-Zusatzinformationen korrekt.
+`chess.js` ist für den Schachzustand maßgeblich. Das 3D-Brett wird nach legalen manuellen Zügen und nach legalen ChessDB-Kandidatenzügen aus diesem Zustand synchronisiert. Damit bleiben Sonderzüge und FEN-Zusatzinformationen korrekt.
 
 ChessDB erhält ausschließlich vollständige FENs aus dem Regelzustand und verändert selbst keinen Spielzustand.
 
 ## Zielarchitektur
 
 ```text
-PGN / Benutzereingabe
-        ↓
-      chess.js
-        ↓
- vollständige FEN
-   ↙          ↘
-3D-Brett     ChessDB
-                ↓
-        Analyse / PV / Zugwahl
-                ↓
-       Varianten / Partieanalyse
+PGN / Benutzereingabe / ChessDB-Kandidat
+                 ↓
+               chess.js
+                 ↓
+          vollständige FEN
+            ↙          ↘
+       3D-Brett       ChessDB
+                         ↓
+                 Analyse / PV
+                         ↓
+                Varianten / Partieanalyse
 ```
