@@ -13,12 +13,14 @@
     .card { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
     textarea { width: 100%; min-height: 72px; box-sizing: border-box; font: 13px ui-monospace, monospace; }
     button { margin: 8px 6px 0 0; padding: 8px 12px; cursor: pointer; }
+    button.candidate-move { margin: 0; padding: 3px 8px; font-weight: 700; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #eee; font-size: 14px; }
     code, pre { font-family: ui-monospace, monospace; }
     pre { white-space: pre-wrap; word-break: break-word; background: #f7f7f7; padding: 10px; border-radius: 6px; max-height: 260px; overflow: auto; }
     .muted { color: #666; font-size: 13px; }
-    .status { min-height: 1.4em; margin-top: 8px; }
+    .game-state { min-height: 1.4em; margin-top: 10px; font-weight: 650; }
+    .status { min-height: 1.4em; margin-top: 3px; }
     @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } #board { min-height: 320px; } }
   </style>
 </head>
@@ -38,7 +40,8 @@
         <button id="deepen">Deepen</button>
         <button id="flip">Brett drehen</button>
       </div>
-      <div class="status" id="status"></div>
+      <div class="game-state" id="gameState" aria-live="polite"></div>
+      <div class="status" id="status" aria-live="polite"></div>
       <div id="moves"></div>
       <pre id="raw" hidden></pre>
     </div>
@@ -57,6 +60,7 @@
 (function () {
   var fenEl = document.getElementById('fen');
   var statusEl = document.getElementById('status');
+  var gameStateEl = document.getElementById('gameState');
   var movesEl = document.getElementById('moves');
   var rawEl = document.getElementById('raw');
   var game = new Chess();
@@ -70,6 +74,38 @@
 
   function pieceMatchesTurn(piece) {
     return piece && piece.charAt(0) === game.turn();
+  }
+
+  function colorName(color) {
+    return color === 'w' ? 'Weiß' : 'Schwarz';
+  }
+
+  function updateGameState() {
+    if (typeof game.in_checkmate === 'function' && game.in_checkmate()) {
+      gameStateEl.textContent = 'Schachmatt – ' + colorName(game.turn() === 'w' ? 'b' : 'w') + ' gewinnt.';
+      return;
+    }
+    if (typeof game.in_stalemate === 'function' && game.in_stalemate()) {
+      gameStateEl.textContent = 'Patt – Remis.';
+      return;
+    }
+    if (typeof game.insufficient_material === 'function' && game.insufficient_material()) {
+      gameStateEl.textContent = 'Remis – unzureichendes Material.';
+      return;
+    }
+    if (typeof game.in_threefold_repetition === 'function' && game.in_threefold_repetition()) {
+      gameStateEl.textContent = 'Remis – dreifache Stellungswiederholung.';
+      return;
+    }
+    if (typeof game.in_draw === 'function' && game.in_draw()) {
+      gameStateEl.textContent = 'Remis.';
+      return;
+    }
+    if (typeof game.in_check === 'function' && game.in_check()) {
+      gameStateEl.textContent = colorName(game.turn()) + ' steht im Schach.';
+      return;
+    }
+    gameStateEl.textContent = colorName(game.turn()) + ' am Zug.';
   }
 
   // chessboard3.js creates the coordinates as real 3D text meshes on all four edges.
@@ -153,6 +189,7 @@
 
       // Synchronisiert Sonderzüge wie Rochade, en passant und Umwandlung.
       board.position(game.fen(), false);
+      updateGameState();
       statusEl.textContent = san + ' gespielt – ChessDB wird aktualisiert …';
       setTimeout(function () { computeCurrentPosition(false); }, 0);
     }
@@ -180,6 +217,7 @@
 
     fenEl.value = game.fen();
     board.position(game.fen(), animate !== false);
+    updateGameState();
     return game.fen();
   }
 
@@ -202,6 +240,61 @@
     return (n / 100).toFixed(2);
   }
 
+  function parseUci(uci) {
+    var match = /^([a-h][1-8])([a-h][1-8])([qrbn])?$/i.exec(String(uci || '').trim());
+    if (!match) return null;
+    return {
+      from: match[1].toLowerCase(),
+      to: match[2].toLowerCase(),
+      promotion: match[3] ? match[3].toLowerCase() : null
+    };
+  }
+
+  function playCandidateMove(uci) {
+    var spec = parseUci(uci);
+    if (!spec) {
+      statusEl.textContent = 'ChessDB-Zug konnte nicht gelesen werden.';
+      return;
+    }
+    if (typeof game.game_over === 'function' && game.game_over()) {
+      updateGameState();
+      statusEl.textContent = 'Die Partie ist beendet.';
+      return;
+    }
+
+    var move = null;
+    try {
+      move = game.move({
+        from: spec.from,
+        to: spec.to,
+        promotion: spec.promotion || 'q'
+      });
+    } catch (e) {
+      move = null;
+    }
+
+    if (move === null) {
+      statusEl.textContent = 'Dieser ChessDB-Zug ist in der aktuellen Stellung nicht legal – bitte neu analysieren.';
+      return;
+    }
+
+    analysisGeneration++;
+    pendingMove = null;
+    fenEl.value = game.fen();
+
+    // Promotions are synchronized instantly because chessboard3.js identifies animation
+    // pieces by type and could otherwise animate an existing queen/rook/bishop/knight.
+    board.position(game.fen(), spec.promotion ? false : true);
+    updateGameState();
+    movesEl.innerHTML = '';
+    rawEl.hidden = true;
+    statusEl.textContent = move.san + ' aus ChessDB gespielt – Analyse wird aktualisiert …';
+
+    setTimeout(function () {
+      computeCurrentPosition(false).catch(function () {});
+    }, spec.promotion ? 0 : 240);
+  }
+
   function renderMoves(result) {
     var moves = ChessBoard3ChessDB.normalizeMoves(result);
     if (!moves.length) {
@@ -212,13 +305,22 @@
     }
     var html = '<table><thead><tr><th>Zug</th><th>Score</th><th>Rank</th><th>Winrate</th><th>Note</th></tr></thead><tbody>';
     moves.slice(0, 12).forEach(function (m) {
-      html += '<tr><td><strong>' + esc(m.san || m.uci || m.move) + '</strong></td>' +
+      var uci = m.uci || m.move || '';
+      var label = m.san || uci || m.move || '?';
+      html += '<tr><td><button type="button" class="candidate-move" data-uci="' + esc(uci) + '"' +
+        (parseUci(uci) ? '' : ' disabled') + '>' + esc(label) + '</button></td>' +
         '<td>' + esc(formatScore(m.score)) + '</td>' +
         '<td>' + esc(m.rank) + '</td><td>' + esc(m.winrate) + '</td><td>' + esc(m.note) + '</td></tr>';
     });
     html += '</tbody></table>';
     movesEl.innerHTML = html;
   }
+
+  movesEl.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || !target.classList || !target.classList.contains('candidate-move')) return;
+    playCandidateMove(target.getAttribute('data-uci'));
+  });
 
   document.getElementById('show').onclick = function () {
     analysisGeneration++;
@@ -245,6 +347,7 @@
       return Promise.reject(e);
     }
 
+    updateGameState();
     busy('ChessDB wird abgefragt …');
     fenEl.value = fen;
 
@@ -270,7 +373,7 @@
         rawEl.textContent = JSON.stringify(r, null, 2);
         rawEl.hidden = false;
       } else {
-        statusEl.textContent = r.status === 'ok' ? 'ChessDB-Ergebnis' : ('ChessDB: ' + (r.status || 'Antwort'));
+        statusEl.textContent = r.status === 'ok' ? 'ChessDB-Ergebnis – Zug anklicken zum Ausführen.' : ('ChessDB: ' + (r.status || 'Antwort'));
         renderMoves(r);
       }
       return r;
@@ -332,6 +435,7 @@
     });
   };
 
+  updateGameState();
   window.addEventListener('resize', function () { board.resize(); });
 })();
 </script>
