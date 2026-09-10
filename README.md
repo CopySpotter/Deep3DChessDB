@@ -8,7 +8,7 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Stabiler Release v0.1.1
+## Stabiler Release v0.1.2
 
 - interaktives 3D-Schachbrett auf Basis von chessboard3.js
 - legale Drag-and-drop-Züge mit chess.js
@@ -27,18 +27,12 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 - kleinere Koordinaten als echte 3D-Objekte direkt am Brett
 - Buchstaben und Zahlen jeweils nur an einer Brettkante
 - Button **Brett drehen** zum Wechsel der Orientierung
-
-## Aktueller Entwicklungsstand: v0.1.2
-
-Auf `main` sind zusätzlich bereits umgesetzt:
-
-- ChessDB-Kandidatenzüge sind direkt anklickbar
-- der angeklickte Zug wird über `chess.js` auf Legalität geprüft und ausgeführt
-- das 3D-Brett wird anschließend aus der neuen FEN synchronisiert
-- ChessDB wird nach dem Kandidatenzug automatisch erneut abgefragt
+- ChessDB-Kandidatenzüge direkt anklickbar
+- Kandidatenzüge werden vor Ausführung über `chess.js` legal validiert
+- FEN, 3D-Brett und ChessDB-Analyse werden nach Kandidatenzügen automatisch aktualisiert
 - sichtbarer Status für Weiß/Schwarz am Zug, Schach, Schachmatt, Patt und Remiszustände
 
-Vor dem Tag `v0.1.2` ist noch der vollständige manuelle Regressionstest vorgesehen. Siehe [`docs/REGRESSION-v0.1.2.md`](docs/REGRESSION-v0.1.2.md).
+Der v0.1.2-Stand wurde unter Linux im Browser manuell getestet.
 
 ## Schnellstart unter Windows
 
@@ -92,7 +86,7 @@ Eine vollständige FEN kann in das Eingabefeld geschrieben und mit **Am Brett an
 
 Die freie Brettfläche kann mit gedrückter Maustaste gedreht und gekippt werden. Mit dem Mausrad wird gezoomt. **Brett drehen** wechselt die Orientierung zwischen Weiß und Schwarz.
 
-Auf dem aktuellen `main` werden ChessDB-Kandidatenzüge als Buttons angezeigt. Ein Klick führt den jeweiligen Zug über `chess.js` aus und startet danach automatisch die Analyse der Folgestellung.
+ChessDB-Kandidatenzüge werden als Buttons angezeigt. Ein Klick führt den jeweiligen Zug über `chess.js` aus und startet danach automatisch die Analyse der Folgestellung.
 
 Zusätzlich stehen **ChessDB analysieren**, **PV** und **Deepen** zur Verfügung.
 
@@ -154,7 +148,7 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Nächste Schritte
 
-Nach dem Regressionstest und dem Tag `v0.1.2` folgen PGN-Unterstützung, Zugliste, Navigation und Variantenbaum.
+Als nächstes folgen kleinere Verbesserungen an Kandidatenanzeige und Analyse-UI. Danach sind PGN-Unterstützung, Zugliste, Navigation und Variantenbaum vorgesehen.
 
 Siehe [`ROADMAP.md`](ROADMAP.md).
 
@@ -167,4 +161,4 @@ Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Status
 
-**v0.1.1 ist der stabile Release. `main` bereitet v0.1.2 vor.**
+**Version 0.1.2 – stabiler, getesteter Analysebrett-Stand.**
