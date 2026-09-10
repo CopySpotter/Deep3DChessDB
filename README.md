@@ -8,29 +8,37 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Funktionsumfang v0.1.1
+## Stabiler Release v0.1.1
 
 - interaktives 3D-Schachbrett auf Basis von chessboard3.js
 - legale Drag-and-drop-Züge mit chess.js
-- Zugrecht, Rochade, en passant und Bauernumwandlung
+- Zugrecht, Rochade, en passant und automatische Damenumwandlung bei manuellen Bauernzügen
 - automatische Aktualisierung der vollständigen FEN nach jedem legalen Zug
 - automatische ChessDB-Abfrage nach jedem Zug
 - ChessDB `queryall`: Kandidatenzüge, Score, Rank, Winrate und Note
 - ChessDB `querypv`: Principal Variation / Hauptvariante
 - ChessDB `querybest`, `queryscore` und `querysearch`
 - `Deepen` / `queue`: Stellung zur weiteren ChessDB-Analyse einreihen
-- automatische Behandlung unbekannter Stellungen:
-  - `queryall&learn=1&showall=1`
-  - bei `unknown`: `queue`
-  - danach erneute Abfrage alle 5 Sekunden
+- automatische Behandlung unbekannter Stellungen mit `queue` und 5-Sekunden-Polling
 - robuste Behandlung unbekannter Scores ohne `NaN`
 - Same-Origin-PHP-Proxy mit HTTPS- und HTTP-Fallback für ChessDB
-- verständlichere Proxy- und Verbindungsfehler in der Oberfläche
 - 3D-Ansicht mit Maus drehen und kippen
 - Mausrad-Zoom
 - kleinere Koordinaten als echte 3D-Objekte direkt am Brett
 - Buchstaben und Zahlen jeweils nur an einer Brettkante
 - Button **Brett drehen** zum Wechsel der Orientierung
+
+## Aktueller Entwicklungsstand: v0.1.2
+
+Auf `main` sind zusätzlich bereits umgesetzt:
+
+- ChessDB-Kandidatenzüge sind direkt anklickbar
+- der angeklickte Zug wird über `chess.js` auf Legalität geprüft und ausgeführt
+- das 3D-Brett wird anschließend aus der neuen FEN synchronisiert
+- ChessDB wird nach dem Kandidatenzug automatisch erneut abgefragt
+- sichtbarer Status für Weiß/Schwarz am Zug, Schach, Schachmatt, Patt und Remiszustände
+
+Vor dem Tag `v0.1.2` ist noch der vollständige manuelle Regressionstest vorgesehen. Siehe [`docs/REGRESSION-v0.1.2.md`](docs/REGRESSION-v0.1.2.md).
 
 ## Schnellstart unter Windows
 
@@ -49,15 +57,13 @@ Dann im Browser öffnen:
 http://127.0.0.1:8011/chessdb-demo.html
 ```
 
-Der Server läuft so lange, wie sein Konsolenfenster geöffnet bleibt. Beenden mit `Strg+C`. Beim nächsten Start kann wieder `start.cmd` oder derselbe PowerShell-Befehl verwendet werden.
+Der Server läuft so lange, wie sein Konsolenfenster geöffnet bleibt. Beenden mit `Strg+C`.
 
-Falls PHP noch nicht installiert ist, kann PHP unter Windows zum Beispiel über `winget` installiert werden:
+Falls PHP noch nicht installiert ist:
 
 ```powershell
 winget install --id PHP.PHP.8.4 -e
 ```
-
-Danach die PowerShell neu öffnen.
 
 ## Schnellstart unter Linux
 
@@ -86,6 +92,8 @@ Eine vollständige FEN kann in das Eingabefeld geschrieben und mit **Am Brett an
 
 Die freie Brettfläche kann mit gedrückter Maustaste gedreht und gekippt werden. Mit dem Mausrad wird gezoomt. **Brett drehen** wechselt die Orientierung zwischen Weiß und Schwarz.
 
+Auf dem aktuellen `main` werden ChessDB-Kandidatenzüge als Buttons angezeigt. Ein Klick führt den jeweiligen Zug über `chess.js` aus und startet danach automatisch die Analyse der Folgestellung.
+
 Zusätzlich stehen **ChessDB analysieren**, **PV** und **Deepen** zur Verfügung.
 
 ## Test-FEN
@@ -96,31 +104,31 @@ Startstellung:
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ```
 
-Taktische Teststellung:
+Schachmatt-Test:
 
 ```text
-3q1rk1/1bp3pp/p1n3p1/8/Bp1P4/6N1/PPP1QnP1/R3R1K1 b - - 0 1
+7k/6Q1/6K1/8/8/8/8/8 b - - 0 1
+```
+
+Patt-Test:
+
+```text
+7k/5Q2/6K1/8/8/8/8/8 b - - 0 1
 ```
 
 ## Architektur
 
 ```text
-Benutzerzug / FEN
-       ↓
-    chess.js
-       ↓
-chessboard3.js
-       ↓
-chessdb-demo.html
-       ↓
-js/chessboard3.chessdb.js
-       ↓
-chessdb-proxy.php
-       ↓
-     ChessDB
+Benutzerzug / FEN / ChessDB-Kandidat
+              ↓
+           chess.js
+              ↓
+        vollständige FEN
+          ↙        ↘
+chessboard3.js    ChessDB
 ```
 
-`chessboard3.js` rendert das 3D-Brett. `chess.js` verwaltet die Schachregeln und erzeugt die korrekte vollständige FEN. Die ChessDB-Schicht fragt die externe Analyse-Datenbank über den lokalen PHP-Proxy ab.
+`chessboard3.js` rendert das 3D-Brett. `chess.js` verwaltet die Schachregeln und ist die Quelle der Wahrheit für Legalität und vollständige FEN. Die ChessDB-Schicht fragt die externe Analyse-Datenbank über den lokalen PHP-Proxy ab.
 
 Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -137,7 +145,8 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 │   └── chessboard3.chessdb.js   ChessDB-Integrationsschicht
 ├── assets/                      3D-Figuren und Fonts
 ├── docs/
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   └── REGRESSION-v0.1.2.md
 ├── ROADMAP.md
 ├── CHANGELOG.md
 └── LICENSE
@@ -145,7 +154,7 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Nächste Schritte
 
-Als Nächstes sollen ChessDB-Kandidatenzüge direkt anklickbar werden und Schach/Matt/Patt deutlicher angezeigt werden. Danach folgen PGN-Unterstützung, Zugliste und Variantenbaum.
+Nach dem Regressionstest und dem Tag `v0.1.2` folgen PGN-Unterstützung, Zugliste, Navigation und Variantenbaum.
 
 Siehe [`ROADMAP.md`](ROADMAP.md).
 
@@ -158,4 +167,4 @@ Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Status
 
-**Version 0.1.1 – stabiler Darstellungs- und Bedienungsstand.**
+**v0.1.1 ist der stabile Release. `main` bereitet v0.1.2 vor.**
