@@ -58,6 +58,14 @@
 - [ ] Bewertungssprünge anzeigen
 - [ ] lokaler Cache für ChessDB-Antworten
 
+## Folgeversion – Optik
+
+- [ ] echte Holzoptik nur mit echten Holztexturen statt bloßer Holzfarben prüfen
+- [ ] alternativ reduziertes Schwarz-Weiß-Design mit schlankeren Bauhaus-Figuren entwickeln
+- [ ] bei dunklen Figuren klaren Kontrast zum Brett und Hintergrund sicherstellen
+- [ ] Figurengröße und Proportionen nach optischem Test neu abstimmen
+- [ ] Optikänderungen weiterhin getrennt vom stabilen Spiel-/Analysecode entwickeln und erst nach Regressionstest übernehmen
+
 ## Später
 
 - [ ] Lichess Cloud Eval als zweite Quelle
