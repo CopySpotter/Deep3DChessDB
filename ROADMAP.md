@@ -31,6 +31,8 @@
 - [x] angeklickten ChessDB-Zug über `chess.js` legal ausführen
 - [x] FEN und Analyse nach Kandidatenzug automatisch aktualisieren
 - [x] Status für Zugrecht, Schach, Matt, Patt und Remiszustände
+- [x] Regressionstest-Checkliste anlegen
+- [x] Release-Dokumentation für v0.1.2 vorbereiten
 - [ ] manuellen Regressionstest auf Linux/Browser vollständig abhaken
 - [ ] v0.1.2 taggen
 
