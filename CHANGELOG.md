@@ -1,10 +1,21 @@
 # Changelog
 
-## Unreleased
+## Unreleased / v0.1.2 in Vorbereitung
 
 ### Hinzugefügt
 
 - `start.cmd` für Windows: startet den lokalen PHP-Server auf Port 8011 und öffnet Deep3DChessDB automatisch im Standardbrowser
+- ChessDB-Kandidatenzüge sind direkt anklickbar
+- angeklickte ChessDB-Züge werden über `chess.js` legal ausgeführt und auf das 3D-Brett übertragen
+- nach einem ChessDB-Kandidatenzug werden FEN und ChessDB-Analyse automatisch aktualisiert
+- sichtbarer Spielstatus für Zugrecht, Schach, Schachmatt, Patt und Remiszustände
+- Regressionstest-Checkliste für den v0.1.2-Stand unter `docs/REGRESSION-v0.1.2.md`
+
+### Technisch
+
+- `chess.js` bleibt auch bei ChessDB-Zugvorschlägen die alleinige Quelle der Wahrheit für Legalität und vollständige FEN
+- veraltete laufende Analyseantworten werden weiterhin über `analysisGeneration` ignoriert
+- Bauernumwandlungen aus ChessDB werden ohne problematische Figurenanimation synchronisiert
 
 ## 0.1.1 - 2026-09-10
 
