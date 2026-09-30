@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.2.0 - in Arbeit
+
+Umschaltbare 2D/3D-Brettansicht auf gemeinsamer `chess.js`-Stellung. Der Code ist implementiert und syntaktisch geprüft; der manuelle Browser-Regressionscheck steht noch aus.
+
+### Hinzugefügt
+
+- zusätzliche 2D-Brettansicht
+- Umschalter zwischen 3D und 2D ohne Seiten-Neuladen
+- 2D-Züge per Klick auf Start- und Zielfeld
+- Synchronisierung von 2D-Zügen auf FEN, 3D-Brett und ChessDB-Analyse
+- Synchronisierung von 3D-Zügen und ChessDB-Kandidatenzügen zurück auf das 2D-Brett
+- gemeinsame Brettorientierung beim Button `Brett drehen`
+- neue Regressionstest-Checkliste unter `docs/REGRESSION-v0.2.0.md`
+
+### Technisch
+
+- `chess.js` bleibt einzige Quelle der Wahrheit für Stellung, Zugrecht und Legalität
+- 2D und 3D teilen dieselbe vollständige FEN und denselben Spielstatus
+- reiner Ansichtswechsel verändert weder FEN noch Analysezustand
+- JavaScript-Syntaxcheck des geänderten Inline-Codes erfolgreich
+
+### Noch offen
+
+- manueller Browser-Test unter Linux
+- Ansichtswechsel während laufender bzw. bereits sichtbarer ChessDB-Analyse prüfen
+- Sonderzüge und Brett-Flip in beiden Ansichten regressionsprüfen
+- erst danach Roadmap-Punkt 0.2.0 vollständig abschließen
+
 ## 0.1.2 - 2026-09-10
 
 Spielbares Analysebrett mit direkt ausführbaren ChessDB-Kandidatenzügen und sichtbarem Spielstatus. Der Stand wurde unter Linux im Browser manuell getestet.
