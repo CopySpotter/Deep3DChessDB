@@ -39,10 +39,10 @@
 
 ### 0.2.0 – 2D-Ansicht vor der Analyse-UI
 
-- [ ] 2D-Brett zusätzlich zum bestehenden 3D-Brett einbinden
-- [ ] Umschalter zwischen 2D- und 3D-Ansicht
-- [ ] beide Ansichten verwenden dieselbe Stellung, FEN, Zugrechte und ChessDB-Analyse
-- [ ] Ansichtswechsel ohne Zug, ohne Neuladen und ohne Verlust des Analysezustands testen
+- [x] 2D-Brett zusätzlich zum bestehenden 3D-Brett einbinden
+- [x] Umschalter zwischen 2D- und 3D-Ansicht
+- [x] beide Ansichten verwenden dieselbe Stellung, FEN, Zugrechte und ChessDB-Analyse
+- [ ] Ansichtswechsel ohne Zug, ohne Neuladen und ohne Verlust des Analysezustands im Browser testen
 - [ ] Bedienung und Regressionstest um 2D/3D-Umschaltung ergänzen
 
 ### 0.2.1 – Kandidatenanzeige und Analyse-UI
