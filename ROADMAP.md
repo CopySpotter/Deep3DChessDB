@@ -39,6 +39,8 @@
 
 ### 0.2.0 – 2D-Ansicht vor der Analyse-UI
 
+**Zwischenstand:** `v0.2.0-alpha.1` – 2D/3D-Umschaltung und Bauhaus-2D-Brett implementiert; vollständiger Browser-Regressionscheck noch offen.
+
 - [x] 2D-Brett zusätzlich zum bestehenden 3D-Brett einbinden
 - [x] Umschalter zwischen 2D- und 3D-Ansicht
 - [x] beide Ansichten verwenden dieselbe Stellung, FEN, Zugrechte und ChessDB-Analyse
