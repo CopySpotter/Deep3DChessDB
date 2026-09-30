@@ -8,13 +8,13 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Aktueller Repository-Stand v0.1.2
+## Aktueller Repository-Stand v0.2.0-alpha.1
 
-Die Entwicklung auf `main` entspricht dem getesteten Stand **v0.1.2**. Ein
-eigenständiger GitHub-Release für diese Version ist noch nicht veröffentlicht;
-der derzeit verfügbare Release bleibt **v0.1.0**. Diese Unterscheidung ist
-bewusst: Der Code- und Dokumentationsstand auf `main` kann weitergeführt
-werden, ohne einen Release nachträglich zu behaupten.
+Die Entwicklung auf `main` entspricht dem Arbeitsstand **v0.2.0-alpha.1**.
+Diese Vorabversion ergänzt die umschaltbare 2D-Ansicht und die neue
+Bauhaus-SVG-Darstellung. Der vollständige manuelle Browser-Regressionscheck
+für v0.2.0 ist noch nicht abgeschlossen; der Stand ist daher bewusst als
+Alpha-Version gekennzeichnet.
 
 - interaktives 3D-Schachbrett auf Basis von chessboard3.js
 - legale Drag-and-drop-Züge mit chess.js
