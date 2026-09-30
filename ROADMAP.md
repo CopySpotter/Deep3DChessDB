@@ -35,11 +35,22 @@
 - [x] Release-Dokumentation für v0.1.2 vorbereiten
 - [x] manuellen Regressionstest auf Linux/Browser durchführen
 
-## 0.2 – Nächster Entwicklungsschritt
+## 0.2 – Umschaltbares Brett und Analyse-UI
 
-- [ ] Kandidatenzüge optisch hervorheben
+### 0.2.0 – 2D-Ansicht vor der Analyse-UI
+
+- [ ] 2D-Brett zusätzlich zum bestehenden 3D-Brett einbinden
+- [ ] Umschalter zwischen 2D- und 3D-Ansicht
+- [ ] beide Ansichten verwenden dieselbe Stellung, FEN, Zugrechte und ChessDB-Analyse
+- [ ] Ansichtswechsel ohne Zug, ohne Neuladen und ohne Verlust des Analysezustands testen
+- [ ] Bedienung und Regressionstest um 2D/3D-Umschaltung ergänzen
+
+### 0.2.1 – Kandidatenanzeige und Analyse-UI
+
+- [ ] Kandidatenzüge als klar lesbare Analysekarten mit Zug, Bewertung, Rang und Gewinnrate darstellen
 - [ ] beste ChessDB-Empfehlung klar kennzeichnen
-- [ ] Spielstatus und Analyseanzeige weiter vereinheitlichen
+- [ ] beim Überfahren oder Anklicken eines Kandidaten Start- und Zielfeld am Brett hervorheben
+- [ ] Spielstatus und Analyseanzeige in einer gemeinsamen Kopfzeile vereinheitlichen
 
 ## 0.3 – Varianten und Partie
 
