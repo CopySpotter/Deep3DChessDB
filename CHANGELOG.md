@@ -1,12 +1,15 @@
 # Changelog
 
-## 0.2.0 - in Arbeit
+## 0.2.0-alpha.1 - 2026-09-30
 
-Umschaltbare 2D/3D-Brettansicht auf gemeinsamer `chess.js`-Stellung. Der Code ist implementiert und syntaktisch geprüft; der manuelle Browser-Regressionscheck steht noch aus.
+Erste Vorabversion der umschaltbaren 2D/3D-Brettansicht auf gemeinsamer `chess.js`-Stellung. Der Code ist implementiert und syntaktisch geprüft; der vollständige manuelle Browser-Regressionscheck steht noch aus.
 
 ### Hinzugefügt
 
 - zusätzliche 2D-Brettansicht
+- geometrische Bauhaus-SVG-Figuren für die 2D-Ansicht
+- 2D-Brettgröße und Figurenproportionen optisch angepasst
+- eigenständige 2D-Farb- und Glanzdarstellung
 - Umschalter zwischen 3D und 2D ohne Seiten-Neuladen
 - 2D-Züge per Klick auf Start- und Zielfeld
 - Synchronisierung von 2D-Zügen auf FEN, 3D-Brett und ChessDB-Analyse
