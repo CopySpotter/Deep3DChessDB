@@ -8,7 +8,13 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 
 *Deep3DChessDB mit 3D-Brett, FEN-Eingabe und ChessDB-Kandidatenzügen.*
 
-## Stabiler Release v0.1.2
+## Aktueller Repository-Stand v0.1.2
+
+Die Entwicklung auf `main` entspricht dem getesteten Stand **v0.1.2**. Ein
+eigenständiger GitHub-Release für diese Version ist noch nicht veröffentlicht;
+der derzeit verfügbare Release bleibt **v0.1.0**. Diese Unterscheidung ist
+bewusst: Der Code- und Dokumentationsstand auf `main` kann weitergeführt
+werden, ohne einen Release nachträglich zu behaupten.
 
 - interaktives 3D-Schachbrett auf Basis von chessboard3.js
 - legale Drag-and-drop-Züge mit chess.js
@@ -24,7 +30,7 @@ Deep3DChessDB kombiniert **chessboard3.js** als 3D-Renderer, **chess.js** als Re
 - Same-Origin-PHP-Proxy mit HTTPS- und HTTP-Fallback für ChessDB
 - 3D-Ansicht mit Maus drehen und kippen
 - Mausrad-Zoom
-- kleinere Koordinaten als echte 3D-Objekte direkt am Brett
+- kleinere Koordinaten als echte 3D-Objecte direkt am Brett
 - Buchstaben und Zahlen jeweils nur an einer Brettkante
 - Button **Brett drehen** zum Wechsel der Orientierung
 - ChessDB-Kandidatenzüge direkt anklickbar
@@ -148,7 +154,15 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Nächste Schritte
 
-Als nächstes folgen kleinere Verbesserungen an Kandidatenanzeige und Analyse-UI. Danach sind PGN-Unterstützung, Zugliste, Navigation und Variantenbaum vorgesehen.
+Vor der Analyse-UI erhält Deep3DChessDB eine umschaltbare **2D-Ansicht**. 2D-
+und 3D-Brett verwenden dabei dieselbe Stellung, denselben Regelkern und
+dieselbe ChessDB-Analyse; ein Ansichtswechsel darf weder FEN noch Zugrecht
+oder Analysezustand verändern.
+
+Danach folgen für v0.2 die bessere Kandidatenanzeige, die klare Kennzeichnung
+der besten Empfehlung, die Hervorhebung von Start- und Zielfeld sowie eine
+einheitliche Status- und Analyseanzeige. Erst danach sind PGN-Unterstützung,
+Zugliste, Navigation und Variantenbaum vorgesehen.
 
 Siehe [`ROADMAP.md`](ROADMAP.md).
 
@@ -161,4 +175,5 @@ Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Status
 
-**Version 0.1.2 – stabiler, getesteter Analysebrett-Stand.**
+**`main`: Version 0.1.2 – getesteter Analysebrett-Stand, noch ohne eigenen
+GitHub-Release. Veröffentlicht ist derzeit Release v0.1.0.**
