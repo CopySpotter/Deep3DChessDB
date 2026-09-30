@@ -154,12 +154,16 @@ Mehr dazu in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Nächste Schritte
 
-Vor der Analyse-UI erhält Deep3DChessDB eine umschaltbare **2D-Ansicht**. 2D-
-und 3D-Brett verwenden dabei dieselbe Stellung, denselben Regelkern und
-dieselbe ChessDB-Analyse; ein Ansichtswechsel darf weder FEN noch Zugrecht
-oder Analysezustand verändern.
+Die umschaltbare **2D-Ansicht** ist auf `main` inzwischen implementiert. 2D-
+und 3D-Brett verwenden dieselbe `chess.js`-Stellung, dieselbe vollständige
+FEN und dieselbe ChessDB-Analyse. Züge im 2D-Brett, 3D-Brett und aus der
+ChessDB-Kandidatenliste werden in beiden Ansichten synchronisiert.
 
-Danach folgen für v0.2 die bessere Kandidatenanzeige, die klare Kennzeichnung
+Der Browser-Regressionscheck für die neue 2D/3D-Umschaltung ist noch offen.
+Die Prüfliste liegt in `docs/REGRESSION-v0.2.0.md`. Erst nach diesem Test
+gilt der Schritt 0.2.0 als vollständig abgeschlossen.
+
+Danach folgen in v0.2.1 die bessere Kandidatenanzeige, die klare Kennzeichnung
 der besten Empfehlung, die Hervorhebung von Start- und Zielfeld sowie eine
 einheitliche Status- und Analyseanzeige. Erst danach sind PGN-Unterstützung,
 Zugliste, Navigation und Variantenbaum vorgesehen.
@@ -175,5 +179,6 @@ Siehe [`ROADMAP.md`](ROADMAP.md).
 
 ## Status
 
-**`main`: Version 0.1.2 – getesteter Analysebrett-Stand, noch ohne eigenen
-GitHub-Release. Veröffentlicht ist derzeit Release v0.1.0.**
+**`main`: v0.2-Arbeitsstand – 2D/3D-Umschaltung implementiert, Browser-
+Regression dafür noch offen. Der letzte vollständig manuell getestete Stand
+ist v0.1.2; veröffentlicht ist derzeit Release v0.1.0.**
