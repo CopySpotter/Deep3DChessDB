@@ -4,6 +4,8 @@ Diese Checkliste sichert den neuen v0.2-Arbeitsstand ab. Der bestehende v0.1.2-R
 
 ## Bisheriges Testergebnis
 
+- 2026-10-07: Das klassische 2D-Design wurde abgenommen und bleibt unverändert.
+
 - 2026-10-07: Start unter Linux und Windows bestätigt. Der lokale PHP-Server
   und `chessdb-demo.html` lassen sich auf beiden Systemen starten.
 - Der übrige Browser-Regressionscheck ist noch offen; insbesondere sind
