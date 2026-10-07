@@ -45,6 +45,25 @@
       color: #1b1b1b;
       filter: drop-shadow(0 1px 1px rgba(255,255,255,.08));
     }
+    #board2d[data-theme="wood"] { border: 10px solid #4d2f1d; box-shadow: 0 8px 18px rgba(39, 24, 13, .28); }
+    #board2d[data-theme="wood"] .square2d.light {
+      background: linear-gradient(135deg, #f4d7a2 0%, #d8a968 100%);
+      box-shadow: inset 0 0 15px rgba(110, 62, 25, .13);
+    }
+    #board2d[data-theme="wood"] .square2d.dark {
+      background: linear-gradient(135deg, #9b5a32 0%, #5b2d18 100%);
+      box-shadow: inset 0 0 15px rgba(26, 11, 4, .2);
+    }
+    #board2d[data-theme="wood"] .piece.staunton {
+      width: 90%; height: 90%; font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.12em; font-weight: 700; line-height: .9;
+    }
+    #board2d[data-theme="wood"] .piece.staunton.white {
+      color: #fff7e6; text-shadow: 0 1px 0 #6e4528, 1px 0 0 #6e4528, -1px 0 0 #6e4528, 0 2px 3px rgba(0,0,0,.42);
+    }
+    #board2d[data-theme="wood"] .piece.staunton.black {
+      color: #25130b; text-shadow: 0 1px 1px rgba(255,235,196,.3), 0 2px 3px rgba(0,0,0,.45);
+    }
     .square2d:focus-visible { outline: 3px solid #111; outline-offset: -3px; z-index: 1; }
     .card { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
     textarea { width: 100%; min-height: 72px; box-sizing: border-box; font: 13px ui-monospace, monospace; }
@@ -69,6 +88,7 @@
       <div class="board-toolbar" aria-label="Brettansicht">
         <button type="button" id="view3d" class="view-button active" aria-pressed="true">3D</button>
         <button type="button" id="view2d" class="view-button" aria-pressed="false">2D</button>
+        <button type="button" id="theme2d" class="view-button" hidden>Holz / Staunton</button>
       </div>
       <div id="board3dView" class="board-view"><div id="board"></div></div>
       <div id="board2dView" class="board-view" hidden><div id="board2d" aria-label="2D-Schachbrett"></div></div>
@@ -111,10 +131,12 @@
   var board2dViewEl = document.getElementById('board2dView');
   var view3dEl = document.getElementById('view3d');
   var view2dEl = document.getElementById('view2d');
+  var theme2dEl = document.getElementById('theme2d');
   var game = new Chess();
   var pendingMove = null;
   var selected2dSquare = null;
   var boardOrientation = 'white';
+  var board2dTheme = 'bauhaus';
   var analysisGeneration = 0;
   var cdb;
 
@@ -163,6 +185,15 @@
     return (piece.color === 'w' ? 'weißer ' : 'schwarzer ') + names[piece.type];
   }
 
+  function pieceStaunton(type, colorClass) {
+    var symbols = {
+      w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
+      b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' }
+    };
+    var color = colorClass === 'white' ? 'w' : 'b';
+    return '<span aria-hidden="true" class="piece staunton ' + colorClass + '">' + symbols[color][type] + '</span>';
+  }
+
   function setBoardView(view) {
     var show2d = view === '2d';
     board2dViewEl.hidden = !show2d;
@@ -171,11 +202,13 @@
     view3dEl.classList.toggle('active', !show2d);
     view2dEl.setAttribute('aria-pressed', show2d ? 'true' : 'false');
     view3dEl.setAttribute('aria-pressed', show2d ? 'false' : 'true');
+    theme2dEl.hidden = !show2d;
     if (!show2d) setTimeout(function () { board.resize(); }, 0);
   }
 
   function render2DBoard() {
     if (!board2dEl) return;
+    board2dEl.setAttribute('data-theme', board2dTheme);
     var files = boardOrientation === 'white' ? ['a','b','c','d','e','f','g','h'] : ['h','g','f','e','d','c','b','a'];
     var ranks = boardOrientation === 'white' ? [8,7,6,5,4,3,2,1] : [1,2,3,4,5,6,7,8];
     var html = '';
@@ -188,7 +221,7 @@
         var dark = (fileIndex + rank) % 2 === 1;
         var selected = selected2dSquare === square ? ' selected' : '';
         var pieceClass = piece ? (piece.color === 'w' ? 'white' : 'black') : '';
-        var pieceHtml = piece ? pieceSVG(piece.type, pieceClass) : '';
+        var pieceHtml = piece ? (board2dTheme === 'wood' ? pieceStaunton(piece.type, pieceClass) : pieceSVG(piece.type, pieceClass)) : '';
         html += '<button type="button" class="square2d ' + (dark ? 'dark' : 'light') + selected +
           '" data-square="' + square + '" aria-label="' + square + ', ' + pieceLabel(piece) + '">' +
           pieceHtml + '</button>';
@@ -270,6 +303,11 @@
 
   view3dEl.addEventListener('click', function () { setBoardView('3d'); });
   view2dEl.addEventListener('click', function () { setBoardView('2d'); });
+  theme2dEl.addEventListener('click', function () {
+    board2dTheme = board2dTheme === 'bauhaus' ? 'wood' : 'bauhaus';
+    theme2dEl.textContent = board2dTheme === 'wood' ? 'Bauhaus / SVG' : 'Holz / Staunton';
+    render2DBoard();
+  });
 
   function isBoardSquare(square) {
     return /^[a-h][1-8]$/.test(String(square || ''));
