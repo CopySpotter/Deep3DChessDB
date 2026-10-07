@@ -4,13 +4,15 @@ Diese Checkliste sichert den neuen v0.2-Arbeitsstand ab. Der bestehende v0.1.2-R
 
 ## Bisheriges Testergebnis
 
-- 2026-10-07: Start unter Linux und Windows bestätigt. Der lokale PHP-Server und `chessdb-demo.html` lassen sich auf beiden Systemen starten.
-- Der übrige Browser-Regressionscheck ist noch offen; insbesondere sind 2D/3D-Umschaltung, Synchronisierung und Sonderzüge noch nicht abgenommen.
+- 2026-10-07: Start unter Linux und Windows bestätigt. Der lokale PHP-Server
+  und `chessdb-demo.html` lassen sich auf beiden Systemen starten.
+- Der übrige Browser-Regressionscheck ist noch offen; insbesondere sind
+  2D/3D-Umschaltung, Synchronisierung und Sonderzüge noch nicht abgenommen.
 
 ## 1. Start
 
 - [ ] Repository auf `main` aktualisieren
-- [ ] lokalen PHP-Server starten
+- [x] lokalen PHP-Server starten (Linux und Windows, 2026-10-07)
 - [ ] `chessdb-demo.html` ohne JavaScript-Fehler laden
 - [ ] 3D-Ansicht ist beim Start aktiv
 - [ ] Umschalter `3D` / `2D` ist sichtbar
