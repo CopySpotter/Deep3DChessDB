@@ -194,7 +194,7 @@
   function pieceStaunton(type, colorClass) {
     var symbols = {
       w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
-      b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' }
+      b: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' }
     };
     var color = colorClass === 'white' ? 'w' : 'b';
     return '<span aria-hidden="true" class="piece staunton ' + colorClass + '" data-symbol="' + symbols[color][type] + '">' + symbols[color][type] + '</span>';
